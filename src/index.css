@@ -18,7 +18,7 @@ code {
 }
 
 .layout {
-    padding: var(--padding-xl);
+    padding: var(--padding-xxl);
     height: 100%;
 }
 main {
@@ -207,4 +207,44 @@ h1, p, a {
 
 h1 {
     color: var(--text-color) !important;
+}
+
+.page-header h1 {
+    color: var(--primary-color) !important;
+    font-weight: var(--font-weight-bold);
+}
+
+.page-header h2 {
+    color: var(--text-color-secondary);
+    font-size: var(--font-size-xl);
+}
+.dashboard-panel {
+    padding-top: var(--padding-xl);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--padding-xl);
+}
+.dashboard-card {
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: var(--padding-xl);
+    padding-bottom: var(--padding-xxl);
+}
+
+.dashboard-icon {
+    display: flex;
+    font-size: var(--font-size-xxl);
+}
+
+.dashboard-name {
+    display: flex;
+    color: var(--text-color);
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+}
+
+.dashboard-desc {
+    color: var(--text-color-secondary);
+    text-align: left;
 }

@@ -4,8 +4,10 @@
     --secondary-color: #4F46E5;
     --accent-color: hsl(244 76% 59% / .1);
     --text-color: #020817;
+    --text-color-secondary: #64748B;
     --text-color-reverse: #FAFAFA;
     --background-color: #F9FAFB;
+    --card-background: #FFFFFF;
 
     /* Размеры */
     --base-spacing: 8px;
@@ -18,7 +20,8 @@
     --padding-s: 4px;
     --padding-m: 8px;
     --padding-l: 16px;
-    --padding-xl: 32px;
+    --padding-xl: 24px;
+    --padding-xxl: 36px;
 
     /* Границы */
     --border-color: rgb(229, 231, 235);
@@ -28,6 +31,7 @@
     --font-size-m: 12px;
     --font-size-l: 16px;
     --font-size-xl: 24px;
+    --font-size-xxl: 36px;
     --font-weight-bold: 700;
 }
 
@@ -37,6 +41,8 @@
     --secondary-color: #A1A1AA;
     --accent-color: hsl(240 3.7% 15.9%);
     --text-color: #FAFAFA;
+    --text-color-secondary: #64748B;
     --text-color-reverse: #020817;
-    --background-color: #151515;
+    --background-color: #09090e;
+    --card-background: #09090e;
 }
