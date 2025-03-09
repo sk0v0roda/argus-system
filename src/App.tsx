@@ -7,8 +7,8 @@ import {Col, Container, Row} from "react-bootstrap";
 import DashboardPage from "../src/pages/DashboardPage";
 import TicketsPage from "../src/pages/TicketsPage";
 import SensorsPage from "../src/pages/SensorsPage";
-import DutyPage from "@/pages/DutyPage";
-import NotificationsPage from "@/pages/NotificationsPage";
+import DutyPage from "../src/pages/DutyPage";
+import NotificationsPage from "../src/pages/NotificationsPage";
 
 function App() {
     const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => {
