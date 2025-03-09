@@ -1,0 +1,42 @@
+:root {
+    /* Цвета */
+    --primary-color: #8B5CF6;
+    --secondary-color: #4F46E5;
+    --accent-color: hsl(244 76% 59% / .1);
+    --text-color: #020817;
+    --text-color-reverse: #FAFAFA;
+    --background-color: #F9FAFB;
+
+    /* Размеры */
+    --base-spacing: 8px;
+    --max-width: 1200px;
+
+    /* Тени */
+    --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+    /* Отступы */
+    --padding-s: 4px;
+    --padding-m: 8px;
+    --padding-l: 16px;
+    --padding-xl: 32px;
+
+    /* Границы */
+    --border-color: rgb(229, 231, 235);
+
+    /* Шрифт */
+    --font-size-s: 8px;
+    --font-size-m: 12px;
+    --font-size-l: 16px;
+    --font-size-xl: 24px;
+    --font-weight-bold: 700;
+}
+
+[data-theme="dark"] {
+    /* Темная тема */
+    --primary-color: #FAFAFA;
+    --secondary-color: #A1A1AA;
+    --accent-color: hsl(240 3.7% 15.9%);
+    --text-color: #FAFAFA;
+    --text-color-reverse: #020817;
+    --background-color: #151515;
+}

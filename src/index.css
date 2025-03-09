@@ -1,0 +1,210 @@
+@import url("../src/lib/variables.css");
+
+
+body {
+    margin: 0;
+    /*font-family: 'ui-sans-serif', sans-serif !important;*/
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+#root {
+    height: 100vh;
+}
+
+.layout {
+    padding: var(--padding-xl);
+    height: 100%;
+}
+main {
+    height: 100%;
+}
+.row {
+    height: 100%;
+}
+
+.container, .container-fluid {
+    height: 100%;
+    background-color: var(--background-color);
+}
+
+.sidebar-container {
+    border-right: 1px solid var(--border-color);
+}
+
+.logo-placeholder {
+    height: 20%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.navbar-header {
+    padding-top: 5%;
+    display: flex;
+    justify-content: space-around;
+}
+
+.navbar-header-title {
+    font-size: var(--font-size-m);
+    font-weight: var(--font-weight-bold);
+    align-items: center;
+    display: flex;
+    color: var(--text-color);
+}
+
+button {
+    border: 0;
+    background: transparent;
+}
+
+.navbar-tabs {
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--padding-l)
+}
+
+.navbar-tab {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: var(--padding-m)
+}
+.navbar-button-link {
+    text-decoration: none;
+    color: inherit;/**/
+}
+.nav-logo-placeholder {
+    display: flex;
+    height: 15%;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.theme-button {
+    border-radius: 64px;
+    padding: var(--padding-m);
+}
+
+.theme-button:hover {
+    background-color: var(--secondary-color);
+}
+
+.nav-argus-icon {
+    height: 84px;
+    width: 84px;
+    background-color: var(--text-color);
+    mask-image: url('assets/icons/logo-black.svg');
+    mask-size: cover;
+    -webkit-mask-image: url('assets/icons/logo-black.svg');
+    -webkit-mask-size: cover;
+}
+.navbar-icon-moon {
+    width: 24px;
+    height: 24px;
+    background-color: var(--text-color);
+    mask-image: url('assets/icons/moon.svg');
+    mask-size: cover;
+    -webkit-mask-image: url('assets/icons/moon.svg');
+    -webkit-mask-size: cover;
+}
+
+.navbar-icon-sun {
+    width: 24px;
+    height: 24px;
+    background-color: var(--text-color);
+    mask-image: url('assets/icons/sun.svg');
+    mask-size: cover;
+    -webkit-mask-image: url('assets/icons/sun.svg');
+    -webkit-mask-size: cover;
+}
+
+.theme-button:hover .navbar-icon-moon {
+    background-color: var(--text-color-reverse);
+    transition: 0.3s;
+}
+
+.navbar-icon-house {
+    width: 20px;
+    height: 20px;
+    background-color: var(--text-color);
+    mask-image: url('assets/icons/house.svg');
+    mask-size: cover;
+    -webkit-mask-image: url('assets/icons/house.svg');
+    -webkit-mask-size: cover;
+}
+
+.navbar-icon-tickets {
+    width: 20px;
+    height: 20px;
+    background-color: var(--text-color);
+    mask-image: url('assets/icons/tickets.svg');
+    mask-size: cover;
+    -webkit-mask-image: url('assets/icons/tickets.svg');
+    -webkit-mask-size: cover;
+}
+
+.navbar-icon-sensors {
+    width: 20px;
+    height: 20px;
+    background-color: var(--text-color);
+    mask-image: url('assets/icons/sensors.svg');
+    mask-size: cover;
+    -webkit-mask-image: url('assets/icons/sensors.svg');
+    -webkit-mask-size: cover;
+}
+
+.navbar-icon-people {
+    width: 20px;
+    height: 20px;
+    background-color: var(--text-color);
+    mask-image: url('assets/icons/people.svg');
+    mask-size: cover;
+    -webkit-mask-image: url('assets/icons/people.svg');
+    -webkit-mask-size: cover;
+}
+
+.navbar-icon-notifications {
+    width: 20px;
+    height: 20px;
+    background-color: var(--text-color);
+    mask-image: url('assets/icons/notification.svg');
+    mask-size: cover;
+    -webkit-mask-image: url('assets/icons/notification.svg');
+    -webkit-mask-size: cover;
+}
+
+.navbar-icon-search {
+    width: 20px;
+    height: 20px;
+    background-color: var(--text-color);
+    mask-image: url('assets/icons/search.svg');
+    mask-size: cover;
+    -webkit-mask-image: url('assets/icons/search.svg');
+    -webkit-mask-size: cover;
+}
+
+.navbar-name {
+    padding-left: var(--padding-m);
+    color: var(--text-color);
+}
+
+button:hover {
+    transition: 0.3s;
+    background-color: var(--accent-color)
+}
+
+h1, p, a {
+    color: var(--text-color);
+}
+
+h1 {
+    color: var(--text-color) !important;
+}
