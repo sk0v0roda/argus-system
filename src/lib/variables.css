@@ -8,6 +8,7 @@
     --text-color-reverse: #FAFAFA;
     --background-color: #F9FAFB;
     --card-background: #FFFFFF;
+    --primary-shadow: #7C3AED;
 
     /* Размеры */
     --base-spacing: 8px;
@@ -45,4 +46,5 @@
     --text-color-reverse: #020817;
     --background-color: #09090e;
     --card-background: #09090e;
+    --primary-shadow: #F0F0F0;
 }

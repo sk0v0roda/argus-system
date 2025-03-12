@@ -25,7 +25,7 @@ const Sidebar: React.FC<SidebarProps> = ({setIsDarkTheme, isDarkTheme}) => {
             className={'navbar-tabs'}
            >
                <NavbarButton iconClass={'navbar-icon-house'} name={'Главная'} to={'/'}></NavbarButton>
-               <NavbarButton iconClass={'navbar-icon-tickets'} name={'Тикеты'} to={'/tickets'}></NavbarButton>
+               <NavbarButton iconClass={'navbar-icon-graph'} name={'Графы'} to={'/statusgraphs'}></NavbarButton>
                <NavbarButton iconClass={'navbar-icon-sensors'} name={'Датчики'} to={'/sensors'}></NavbarButton>
                <NavbarButton iconClass={'navbar-icon-people'} name={'Дежурства'} to={'/duty'}></NavbarButton>
                <NavbarButton iconClass={'navbar-icon-notifications'} name={'Уведомления'} to={'/notifications'}></NavbarButton>
