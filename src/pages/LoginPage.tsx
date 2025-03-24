@@ -1,55 +1,37 @@
-import React, {useEffect, useState} from 'react';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { RootState } from '../store/store';
+import { setTheme } from '../store/slices/themeSlice';
 
-interface LoginProps {
-    setIsDarkTheme: (isDark: boolean) => void; // Проп для изменения темы
-    isDarkTheme: boolean;
+interface LoginPageProps {
+    onLogin: (username: string) => void;
 }
-const LoginPage = ({ onLogin, setIsDarkTheme, isDarkTheme }: { onLogin: (username: string) => void, setIsDarkTheme: (isDark: boolean) => void, isDarkTheme: boolean }) => {
+
+const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
-    const [touched, setTouched] = useState<{ username: boolean; password: boolean }>({
-        username: false,
-        password: false,
-    });
+    const [error, setError] = useState('');
+    const dispatch = useDispatch();
     const navigate = useNavigate();
-
-    const validateForm = () => {
-        const newErrors: { username?: string; password?: string } = {};
-
-        if (!username.trim()) {
-            newErrors.username = 'Логин обязателен';
-        }
-
-        if (!password) {
-            newErrors.password = 'Пароль обязателен';
-        } else if (password.length < 8 || password.length > 40) {
-            newErrors.password = 'Пароль должен быть от 8 до 40 символов';
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
+    const isDarkTheme = useSelector((state: RootState) => state.theme.isDarkTheme);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setTouched({ username: true, password: true });
+        setError('');
 
-        if (validateForm()) {
-            setTimeout(() => {
-                onLogin(username);
-                navigate('/');
-            }, 500)
+        if (!username || !password) {
+            setError('Пожалуйста, заполните все поля');
+            return;
+        }
+
+        try {
+            onLogin(username);
+            navigate('/');
+        } catch (err) {
+            setError('Ошибка входа. Проверьте логин и пароль.');
         }
     };
-
-    useEffect(() => {
-        if (touched.username || touched.password) {
-            validateForm();
-        }
-    }, [username, password, touched]);
-
 
     return (
         <div className="login-container">
@@ -62,43 +44,26 @@ const LoginPage = ({ onLogin, setIsDarkTheme, isDarkTheme }: { onLogin: (usernam
                         placeholder="Логин"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        onBlur={() => setTouched(prev => ({ ...prev, username: true }))}
-                        className={errors.username ? 'error' : ''}
                     />
                 </div>
-
-                {touched.username && errors.username && (
-                    <div className="error-message">{errors.username}</div>
-                )}
                 <div className="input-group">
                     <input
                         type="password"
                         placeholder="Пароль"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        onBlur={() => setTouched(prev => ({ ...prev, password: true }))}
-                        className={errors.password ? 'error' : ''}
                     />
                 </div>
-                {touched.password && errors.password && (
-                    <div className="error-message">{errors.password}</div>
-                )}
-                <button
-                    type="submit"
-                    className="login-button"
-                    disabled={!!errors.username || !!errors.password}
-                >
+                {error && <div className="error-message">{error}</div>}
+                <button type="submit" className="login-button">
                     Войти
                 </button>
-                <button
-                    type="button"
-                    className="register-button"
-                >
+                <button type="button" className="register-button">
                     Зарегистрироваться
                 </button>
                 <button className={'theme-button'} onClick={(e) => {
-                    e.preventDefault()
-                    setIsDarkTheme(!isDarkTheme)
+                    e.preventDefault();
+                    dispatch(setTheme(!isDarkTheme));
                 }}>
                     <div className={isDarkTheme ? 'navbar-icon-sun' : 'navbar-icon-moon'}></div>
                 </button>
