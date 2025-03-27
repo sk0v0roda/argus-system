@@ -8,9 +8,31 @@ export interface StatusGraph {
 }
 
 export interface Sensor {
-    id: number;
-    name: string;
+    "id": string | undefined,
+    "ticketTitle": string,
+    "ticketDescription": string,
+    "ticketPriority": string,
+    "ticketDeadline": Date,
+    "businessProcessId": string
+  }
+
+export interface Status {
+    "id": string | undefined
+    "name": string,
+    "description": string,
+    "escalationSLA": number,
+    "notification": {
+        "deliveryType": string,
+        "pingInterval": number
+    },
+    "comment": {
+        "text": string,
+        "userIds": number[]
+    },
+    "dutyId": number,
 }
+
+
 const fireResponseProcess = {
     nodes: [
         {
