@@ -9,6 +9,7 @@ import GraphStatusPage from "./pages/GraphStatusPage";
 import SensorsPage from "../src/pages/SensorsPage";
 import DutyPage from "../src/pages/DutyPage";
 import LoginPage from "../src/pages/LoginPage";
+import RegisterPage from "../src/pages/RegisterPage";
 import NotificationsPage from "../src/pages/NotificationsPage";
 import { Navigate, Outlet } from 'react-router-dom';
 import GraphDetailsPage from "../src/pages/GraphDetailsPage";
@@ -31,6 +32,12 @@ function AppContent() {
         dispatch(login(username));
     };
 
+    const handleRegister = (username: string, password: string, confirmPassword: string) => {
+        // Здесь будет логика регистрации
+        // Пока просто логиним пользователя
+        dispatch(login(username));
+    };
+
     const handleLogout = () => {
         dispatch(logout());
     };
@@ -40,6 +47,9 @@ function AppContent() {
             <Routes>
                 <Route path="/login" element={
                     <LoginPage onLogin={handleLogin} />
+                } />
+                <Route path="/register" element={
+                    <RegisterPage onRegister={handleRegister} />
                 } />
 
                 <Route element={<ProtectedRoute />}>

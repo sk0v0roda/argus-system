@@ -4,13 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import { RootState } from '../store/store';
 import { setTheme } from '../store/slices/themeSlice';
 
-interface LoginPageProps {
-    onLogin: (username: string) => void;
+interface RegisterPageProps {
+    onRegister: (username: string, password: string, confirmPassword: string) => void;
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -20,16 +21,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         e.preventDefault();
         setError('');
 
-        if (!username || !password) {
+        if (!username || !password || !confirmPassword) {
             setError('Пожалуйста, заполните все поля');
             return;
         }
 
+        if (password !== confirmPassword) {
+            setError('Пароли не совпадают');
+            return;
+        }
+
         try {
-            onLogin(username);
+            onRegister(username, password, confirmPassword);
             navigate('/');
         } catch (err) {
-            setError('Ошибка входа. Проверьте логин и пароль.');
+            setError('Ошибка регистрации. Попробуйте другой логин.');
         }
     };
 
@@ -54,12 +60,20 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                         onChange={(e) => setPassword(e.target.value)}
                     />
                 </div>
+                <div className="input-group">
+                    <input
+                        type="password"
+                        placeholder="Подтвердите пароль"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                </div>
                 {error && <div className="error-message">{error}</div>}
                 <button type="submit" className="login-button">
-                    Войти
-                </button>
-                <button type="button" className="register-button" onClick={() => navigate('/register')}>
                     Зарегистрироваться
+                </button>
+                <button type="button" className="register-button" onClick={() => navigate('/login')}>
+                    Уже есть аккаунт? Войти
                 </button>
                 <button className={'theme-button'} onClick={(e) => {
                     e.preventDefault();
@@ -72,4 +86,4 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     );
 };
 
-export default LoginPage;
+export default RegisterPage; 
