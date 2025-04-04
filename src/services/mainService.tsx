@@ -215,3 +215,142 @@ export const getStatusGraphById = (id: string): Promise<StatusGraph> => {
         }, 250);
     });
 }
+
+export const getDuties = (): Promise<Duty[]> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve([
+                {
+                    id: 1,
+                    start_time: new Date(),
+                    interval: {
+                        seconds: 28800, // 8 часов
+                        zero: false,
+                        nano: 0,
+                        negative: false,
+                        positive: true,
+                        units: [
+                            {
+                                durationEstimated: false,
+                                timeBased: true,
+                                dateBased: false
+                            }
+                        ]
+                    },
+                    ids: [1, 2, 3]
+                },
+                {
+                    id: 2,
+                    start_time: new Date(),
+                    interval: {
+                        seconds: 43200, // 12 часов
+                        zero: false,
+                        nano: 0,
+                        negative: false,
+                        positive: true,
+                        units: [
+                            {
+                                durationEstimated: false,
+                                timeBased: true,
+                                dateBased: false
+                            }
+                        ]
+                    },
+                    ids: [4, 5]
+                }
+            ]);
+        }, 1000);
+    });
+};
+
+export const getDutyById = (id: number): Promise<Duty> => {
+    return new Promise((resolve) => {
+        setTimeout(async () => {
+            const list = await getDuties();
+            resolve(
+                list.filter(x => x.id === id)[0]
+            );
+        }, 250);
+    });
+}
+
+export const updateDuty = (duty: Duty): Promise<Duty> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve(duty);
+        }, 250);
+    });
+}
+
+export const getStatuses = (): Promise<Status[]> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve([
+                {
+                    id: '1',
+                    name: 'Критический',
+                    description: 'Требует немедленного реагирования',
+                    escalationSLA: 15,
+                    notification: {
+                        deliveryType: 'SMS',
+                        pingInterval: 5
+                    },
+                    comment: {
+                        text: 'Оповестить руководство',
+                        userIds: [1, 2]
+                    },
+                    dutyId: 1
+                },
+                {
+                    id: '2',
+                    name: 'Высокий',
+                    description: 'Требует реагирования в течение часа',
+                    escalationSLA: 60,
+                    notification: {
+                        deliveryType: 'Email',
+                        pingInterval: 15
+                    },
+                    comment: {
+                        text: 'Оповестить дежурную смену',
+                        userIds: [3, 4]
+                    },
+                    dutyId: 2
+                },
+                {
+                    id: '3',
+                    name: 'Средний',
+                    description: 'Требует реагирования в течение дня',
+                    escalationSLA: 480,
+                    notification: {
+                        deliveryType: 'Email',
+                        pingInterval: 60
+                    },
+                    comment: {
+                        text: 'Зафиксировать в системе',
+                        userIds: [5]
+                    },
+                    dutyId: 1
+                }
+            ]);
+        }, 1000);
+    });
+};
+
+export const getStatusById = (id: string): Promise<Status> => {
+    return new Promise((resolve) => {
+        setTimeout(async () => {
+            const list = await getStatuses();
+            resolve(
+                list.filter(x => x.id === id)[0]
+            );
+        }, 250);
+    });
+}
+
+export const updateStatus = (status: Status): Promise<Status> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve(status);
+        }, 250);
+    });
+}

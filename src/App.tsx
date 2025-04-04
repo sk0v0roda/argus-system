@@ -8,9 +8,11 @@ import DashboardPage from "../src/pages/DashboardPage";
 import GraphStatusPage from "./pages/GraphStatusPage";
 import SensorsPage from "../src/pages/SensorsPage";
 import DutyPage from "../src/pages/DutyPage";
+import DutyDetailsPage from "../src/pages/DutyDetailsPage";
 import LoginPage from "../src/pages/LoginPage";
 import RegisterPage from "../src/pages/RegisterPage";
-import NotificationsPage from "../src/pages/NotificationsPage";
+import StatusPage from "../src/pages/StatusPage";
+import StatusDetailsPage from "../src/pages/StatusDetailsPage";
 import { Navigate, Outlet } from 'react-router-dom';
 import GraphDetailsPage from "../src/pages/GraphDetailsPage";
 import SensorDetailsPage from "../src/pages/SensorDetailsPage";
@@ -80,8 +82,10 @@ function AppContent() {
                         <Route path="/statusgraphs/:id" element={<GraphDetailsPage/>}/>
                         <Route path="/sensors" element={<SensorsPage/>}/>
                         <Route path="/sensors/:id" element={<SensorDetailsPage/>}/>
-                        <Route path="/duty" element={<DutyPage/>}/>
-                        <Route path="/notifications" element={<NotificationsPage/>}/>
+                        <Route path="/duties" element={<DutyPage/>}/>
+                        <Route path="/duties/:id" element={<DutyDetailsPage/>}/>
+                        <Route path="/statuses" element={<StatusPage/>}/>
+                        <Route path="/statuses/:id" element={<StatusDetailsPage/>}/>
                         <Route path="*" element={<NotFoundPage/>}/>
                     </Route>
                 </Route>

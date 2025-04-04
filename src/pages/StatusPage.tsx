@@ -1,40 +1,38 @@
 import React, { useEffect, useState } from 'react';
-import { Duty, getDuties } from '../services/mainService';
+import { Status, getStatuses } from '../services/mainService';
 import { useNavigate } from 'react-router-dom';
 import Layout from "src/components/Layout";
 import Button from "src/components/ui/Button";
 import { CircularProgress, List, ListItem, ListItemText, Paper, TextField } from "@mui/material";
 import { formPaperStyles, formTextFieldStyles, listItemStyles } from "src/styles/formStyles";
 
-const DutyPage: React.FC = () => {
-    const [duties, setDuties] = useState<Duty[]>([]);
+const StatusPage: React.FC = () => {
+    const [statuses, setStatuses] = useState<Status[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         setIsLoading(true);
-        getDuties().then((data) => {
+        getStatuses().then((data) => {
             setIsLoading(false);
-            setDuties(data);
+            setStatuses(data);
         });
     }, []);
 
-    const formatDutyInfo = (duty: Duty) => {
-        const date = new Date(duty.start_time).toLocaleString();
-        const hours = duty.interval.seconds / 3600;
-        const employees = duty.ids.length;
-        return `Начало: ${date} | Длительность: ${hours}ч | Сотрудников: ${employees}`;
+    const formatStatusInfo = (status: Status) => {
+        return `SLA: ${status.escalationSLA} мин. | Тип уведомления: ${status.notification.deliveryType} | Интервал: ${status.notification.pingInterval} мин.`;
     };
 
-    const filteredDuties = duties.filter((duty) =>
-        formatDutyInfo(duty).toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredStatuses = statuses.filter((status) =>
+        status.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        status.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
         <Layout>
             <div className={'page-header'}>
-                <h1>Дежурства</h1>
+                <h1>Статусы</h1>
             </div>
             <div className={'page-toolbar'}>
                 <Button>Создать</Button>
@@ -54,16 +52,16 @@ const DutyPage: React.FC = () => {
 
                     <List>
                         {isLoading && <CircularProgress color="secondary" size={50} thickness={5} />}
-                        {filteredDuties.map((duty) => (
+                        {filteredStatuses.map((status) => (
                             <ListItem
-                                key={duty.id}
+                                key={status.id}
                                 className={'list-item'}
-                                onClick={() => navigate(`/duties/${duty.id}`)}
+                                onClick={() => navigate(`/statuses/${status.id}`)}
                                 sx={listItemStyles}
                             >
                                 <ListItemText
-                                    primary={`Дежурство #${duty.id}`}
-                                    secondary={formatDutyInfo(duty)}
+                                    primary={status.name}
+                                    secondary={formatStatusInfo(status)}
                                 />
                             </ListItem>
                         ))}
@@ -74,4 +72,4 @@ const DutyPage: React.FC = () => {
     );
 };
 
-export default DutyPage;
+export default StatusPage; 

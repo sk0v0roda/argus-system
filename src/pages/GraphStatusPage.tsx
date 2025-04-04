@@ -4,7 +4,7 @@ import Button from "src/components/ui/Button";
 import {List, Paper, TextField, ListItem, ListItemText, CircularProgress} from "@mui/material";
 import {getStatusGraphs, StatusGraph} from "src/services/mainService";
 import {useNavigate} from "react-router-dom";
-
+import {formTextFieldStyles} from "src/styles/formStyles";
 const GraphStatusPage = () => {
     const [statusGraphs, setStatusGraphs] = useState<StatusGraph[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -47,6 +47,7 @@ const GraphStatusPage = () => {
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                         style={{marginBottom: '16px'}}
                         className={'textfield'}
+                        sx={formTextFieldStyles}
                     />
 
                     {/* Список элементов */}

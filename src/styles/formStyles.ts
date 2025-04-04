@@ -1,4 +1,6 @@
-export const formTextFieldStyles = {
+import { SxProps } from '@mui/system';
+
+export const formTextFieldStyles: SxProps = {
     '& .MuiInputBase-root': {
         color: 'var(--text-color)',
         backgroundColor: 'var(--card-background)',
@@ -11,10 +13,10 @@ export const formTextFieldStyles = {
             borderColor: 'var(--border-color)',
         },
         '&:hover fieldset': {
-            borderColor: 'var(--border-color)',
+            borderColor: 'var(--border-color-hover)',
         },
         '&.Mui-focused fieldset': {
-            borderColor: 'var(--border-color)',
+            borderColor: 'var(--primary-color)',
         },
     },
     '& .Mui-disabled': {
@@ -25,9 +27,12 @@ export const formTextFieldStyles = {
     '& .Mui-disabled .MuiOutlinedInput-notchedOutline': {
         borderColor: 'var(--border-color) !important',
     },
+    '& .MuiInputBase-input': {
+        color: 'var(--text-color)',
+    },
 };
 
-export const formPaperStyles = {
+export const formPaperStyles: SxProps = {
     backgroundColor: 'var(--card-background)',
     border: '1px solid var(--border-color)',
     padding: '16px',
@@ -35,7 +40,7 @@ export const formPaperStyles = {
     boxShadow: 'none'
 };
 
-export const formButtonStyles = {
+export const formButtonStyles: SxProps = {
     backgroundColor: 'var(--card-background)',
     border: '1px solid var(--border-color)',
     color: 'var(--text-color)',
@@ -44,8 +49,8 @@ export const formButtonStyles = {
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     '&:hover': {
-        backgroundColor: 'var(--hover-color)',
-        transform: 'translateY(-2px)',
+        borderColor: 'var(--border-color-hover)',
+        backgroundColor: 'var(--button-hover-background)',
     },
     '&:active': {
         transform: 'translateY(0)',
@@ -64,5 +69,14 @@ export const formButtonStyles = {
             backgroundColor: 'var(--hover-color)',
             borderColor: 'var(--border-color)',
         },
+    },
+};
+
+export const listItemStyles: SxProps = {
+    '& .MuiListItemText-primary': {
+        color: 'var(--text-color)',
+    },
+    '& .MuiListItemText-secondary': {
+        color: 'var(--text-secondary-color)',
     },
 }; 

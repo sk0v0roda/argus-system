@@ -5,6 +5,7 @@ import Button from "src/components/ui/Button";
 import {CircularProgress, List, ListItem, ListItemText, Paper, TextField} from "@mui/material";
 import {getSensors, Sensor} from "src/services/mainService";
 import {useNavigate} from "react-router-dom";
+import { formPaperStyles, formTextFieldStyles, listItemStyles } from "src/styles/formStyles";
 
 const SensorsPage = () => {
     const [sensors, setSensors] = useState<Sensor[]>([]);
@@ -28,48 +29,42 @@ const SensorsPage = () => {
     );
     return (
         <Layout>
-                <div className={'page-header'}>
-                    <h1>Датчики</h1>
-                </div>
-                <div className={'page-toolbar'}>
-                    <Button>Создать</Button>
-                </div>
-                <div className={'page-content'}>
-                    <Paper elevation={3}
-                           sx={{
-                               backgroundColor: 'var(--card-background)', // Используем CSS-переменную
-                               border: '1px solid var(--border-color)',
-                               padding: '16px',
-                           }}>
-                        {/* Поле поиска */}
-                        <TextField
-                            label="Поиск"
-                            variant="outlined"
-                            fullWidth
-                            value={searchQuery}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-                            style={{ marginBottom: '16px' }}
-                            className={'textfield'}
-                        />
+            <div className={'page-header'}>
+                <h1>Датчики</h1>
+            </div>
+            <div className={'page-toolbar'}>
+                <Button>Создать</Button>
+            </div>
+            <div className={'page-content'}>
+                <Paper elevation={3} sx={formPaperStyles}>
+                    <TextField
+                        label="Поиск"
+                        variant="outlined"
+                        fullWidth
+                        value={searchQuery}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                        style={{ marginBottom: '16px' }}
+                        className={'textfield'}
+                        sx={formTextFieldStyles}
+                    />
 
-                        {/* Список элементов */}
-                        <List>
-                            <>
-                                {isLoading && <CircularProgress color="secondary" size={50} thickness={5} />}
-                                {filteredItems.map((item, index) => (
-                                    <ListItem 
-                                        key={index} 
-                                        className={'list-item'}
-                                        onClick={() => navigate(`/sensors/${item.id}`)}
-                                    >
-                                        <ListItemText primary={item.ticketTitle} />
-                                    </ListItem>
-                                ))}
-                            </>
-                        </List>
-                    </Paper>
-                </div>
-            </Layout>
+                    <List>
+                        {isLoading && <CircularProgress color="secondary" size={50} thickness={5} />}
+                        {filteredItems.map((item, index) => (
+                            <ListItem
+                                key={index}
+                                className={'list-item'}
+                                onClick={() => navigate(`/sensors/${item.id}`)}
+                                sx={listItemStyles}
+                            >
+                                <ListItemText primary={item.ticketTitle} />
+                            </ListItem>
+                        ))}
+                    </List>
+                </Paper>
+            </div>
+        </Layout>
     );
 };
+
 export default SensorsPage;
