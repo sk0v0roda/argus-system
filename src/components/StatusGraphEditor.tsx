@@ -78,10 +78,10 @@ const StatusGraphEditor: React.FC<StatusGraphEditorProps> = ({ graph, onSave }) 
                     <Background />
                     <Controls />
                     <Panel position="top-right" style={{ display: 'flex', gap: '8px' }}>
-                        <Button onClick={() => setIsAddNodeDialogOpen(true)}>
+                        <Button onClick={() => { console.log("Opening dialog"); setIsAddNodeDialogOpen(true); }}>
                             Добавить узел
                         </Button>
-                        <Button onClick={handleSave}>
+                        <Button onClick={() => { console.log("Saving changes"); handleSave(); }}>
                             Сохранить изменения
                         </Button>
                     </Panel>

@@ -1,11 +1,13 @@
 import React from 'react';
-/*
-interface ButtonProps {
-}*/
 
-const Button = ({children} : any) => {
+interface ButtonProps {
+    children: React.ReactNode;
+    onClick?: () => void;
+}
+
+const Button: React.FC<ButtonProps> = ({ children, onClick }) => {
     return (
-        <div className='button'>
+        <div className='button' onClick={onClick}>
             {children}
         </div>
     );
