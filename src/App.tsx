@@ -13,6 +13,7 @@ import RegisterPage from "../src/pages/RegisterPage";
 import NotificationsPage from "../src/pages/NotificationsPage";
 import { Navigate, Outlet } from 'react-router-dom';
 import GraphDetailsPage from "../src/pages/GraphDetailsPage";
+import SensorDetailsPage from "../src/pages/SensorDetailsPage";
 import { Provider } from 'react-redux';
 import { store } from './store/store';
 import { useSelector, useDispatch } from 'react-redux';
@@ -78,6 +79,7 @@ function AppContent() {
                         <Route path="/statusgraphs" element={<GraphStatusPage/>}/>
                         <Route path="/statusgraphs/:id" element={<GraphDetailsPage/>}/>
                         <Route path="/sensors" element={<SensorsPage/>}/>
+                        <Route path="/sensors/:id" element={<SensorDetailsPage/>}/>
                         <Route path="/duty" element={<DutyPage/>}/>
                         <Route path="/notifications" element={<NotificationsPage/>}/>
                         <Route path="*" element={<NotFoundPage/>}/>

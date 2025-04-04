@@ -4,10 +4,12 @@ import Layout from "src/components/Layout";
 import Button from "src/components/ui/Button";
 import {CircularProgress, List, ListItem, ListItemText, Paper, TextField} from "@mui/material";
 import {getSensors, Sensor} from "src/services/mainService";
+import {useNavigate} from "react-router-dom";
 
 const SensorsPage = () => {
     const [sensors, setSensors] = useState<Sensor[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         setIsLoading(true);
@@ -22,7 +24,7 @@ const SensorsPage = () => {
 
 // Фильтрация элементов по поисковому запросу
     const filteredItems = sensors.filter((item) =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+        item.ticketTitle.toLowerCase().includes(searchQuery.toLowerCase())
     );
     return (
         <Layout>
@@ -55,8 +57,12 @@ const SensorsPage = () => {
                             <>
                                 {isLoading && <CircularProgress color="secondary" size={50} thickness={5} />}
                                 {filteredItems.map((item, index) => (
-                                    <ListItem key={index} className={'list-item'}>
-                                        <ListItemText primary={item.name} />
+                                    <ListItem 
+                                        key={index} 
+                                        className={'list-item'}
+                                        onClick={() => navigate(`/sensors/${item.id}`)}
+                                    >
+                                        <ListItemText primary={item.ticketTitle} />
                                     </ListItem>
                                 ))}
                             </>
