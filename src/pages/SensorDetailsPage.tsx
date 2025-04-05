@@ -1,21 +1,34 @@
 import React, {useEffect, useState} from 'react';
-import {useParams} from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
 import Layout from "src/components/Layout";
 import {CircularProgress, Paper, TextField, Button, Box} from "@mui/material";
-import {getSensorById, updateSensor, Sensor} from "src/services/mainService";
+import {getSensorById, updateSensor, createSensor, Sensor} from "src/services/mainService";
 import {formTextFieldStyles, formPaperStyles, formButtonStyles} from "src/styles/formStyles";
 
 const SensorDetailsPage = () => {
     const {id} = useParams<{ id: string }>();
+    const navigate = useNavigate();
     const [sensorData, setSensorData] = useState<Sensor | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
+    const isCreating = !id;
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 if (!id) {
-                    throw new Error('ID датчика не указан');
+                    // Создание нового датчика
+                    setSensorData({
+                        id: undefined,
+                        ticketTitle: '',
+                        ticketDescription: '',
+                        ticketPriority: 'Средний',
+                        ticketDeadline: new Date(),
+                        businessProcessId: ''
+                    });
+                    setIsEditing(true);
+                    setIsLoading(false);
+                    return;
                 }
 
                 const data = await getSensorById(id);
@@ -33,15 +46,13 @@ const SensorDetailsPage = () => {
     const handleSave = async () => {
         if (sensorData) {
             try {
-                console.log('Сохранение датчика:', {
-                    id: sensorData.id,
-                    title: sensorData.ticketTitle,
-                    description: sensorData.ticketDescription,
-                    priority: sensorData.ticketPriority,
-                    deadline: sensorData.ticketDeadline,
-                    businessProcessId: sensorData.businessProcessId
-                });
-                await updateSensor(sensorData);
+                let savedSensor;
+                if (isCreating) {
+                    savedSensor = await createSensor(sensorData);
+                    navigate('/sensors');
+                } else {
+                    savedSensor = await updateSensor(sensorData);
+                }
                 setIsEditing(false);
             } catch (error) {
                 console.error('Ошибка сохранения данных:', error);
@@ -53,7 +64,9 @@ const SensorDetailsPage = () => {
         if (sensorData) {
             setSensorData({
                 ...sensorData,
-                [field]: field === 'ticketDeadline' ? new Date(event.target.value) : event.target.value
+                [field]: field === 'ticketDeadline' ? 
+                    (event.target.value ? new Date(event.target.value) : new Date()) 
+                    : event.target.value
             });
         }
     };
@@ -61,7 +74,7 @@ const SensorDetailsPage = () => {
     return (
         <Layout>
             <div className={'page-header'}>
-                <h1>Детали датчика</h1>
+                <h1>{isCreating ? 'Создание датчика' : 'Детали датчика'}</h1>
             </div>
             <div className={'page-content'}>
                 <Paper elevation={3} sx={formPaperStyles}>
@@ -116,7 +129,7 @@ const SensorDetailsPage = () => {
                                 sx={formTextFieldStyles}
                             />
                             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
-                                {!isEditing ? (
+                                {!isEditing && !isCreating ? (
                                     <Button 
                                         variant="outlined" 
                                         onClick={() => setIsEditing(true)}
@@ -128,7 +141,13 @@ const SensorDetailsPage = () => {
                                     <>
                                         <Button 
                                             variant="outlined" 
-                                            onClick={() => setIsEditing(false)}
+                                            onClick={() => {
+                                                if (isCreating) {
+                                                    navigate('/sensors');
+                                                } else {
+                                                    setIsEditing(false);
+                                                }
+                                            }}
                                             sx={formButtonStyles}
                                         >
                                             Отмена
@@ -138,13 +157,13 @@ const SensorDetailsPage = () => {
                                             onClick={handleSave}
                                             sx={formButtonStyles}
                                         >
-                                            Сохранить
+                                            {isCreating ? 'Создать' : 'Сохранить'}
                                         </Button>
                                     </>
                                 )}
                             </Box>
                         </Box>
-                    ) : (
+                    ) : !isCreating && (
                         <div>Датчик не найден</div>
                     )}
                 </Paper>

@@ -16,7 +16,7 @@ const DashboardPage = () => {
                                desc={'Управление графами статусов'}></DashboardCard>
                 <DashboardCard to={'/sensors'} name={'Датчики'} icon={'📊'}
                                desc={'Мониторинг и управление датчиками'}></DashboardCard>
-                <DashboardCard to={'/duty'} name={'Дежурства'} icon={'👥'}
+                <DashboardCard to={'/duties'} name={'Дежурства'} icon={'👥'}
                                desc={'Организация смен и управление дежурствами'}></DashboardCard>
                 <DashboardCard to={'/statuses'} name={'Статусы'} icon={'🔔'}
                                desc={'Управление статусами'}></DashboardCard>

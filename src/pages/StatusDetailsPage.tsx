@@ -1,21 +1,41 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Status, getStatusById, updateStatus } from '../services/mainService';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Status, getStatusById, updateStatus, createStatus } from '../services/mainService';
 import Layout from "src/components/Layout";
 import { CircularProgress, Paper, TextField, Button, Box } from "@mui/material";
 import { formTextFieldStyles, formPaperStyles, formButtonStyles } from "src/styles/formStyles";
 
 const StatusDetailsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
     const [statusData, setStatusData] = useState<Status | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
+    const isCreating = !id;
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 if (!id) {
-                    throw new Error('ID статуса не указан');
+                    // Создание нового статуса
+                    setStatusData({
+                        id: undefined,
+                        name: '',
+                        description: '',
+                        escalationSLA: 60,
+                        notification: {
+                            deliveryType: 'Email',
+                            pingInterval: 15
+                        },
+                        comment: {
+                            text: '',
+                            userIds: []
+                        },
+                        dutyId: 1
+                    });
+                    setIsEditing(true);
+                    setIsLoading(false);
+                    return;
                 }
 
                 const data = await getStatusById(id);
@@ -33,16 +53,13 @@ const StatusDetailsPage: React.FC = () => {
     const handleSave = async () => {
         if (statusData) {
             try {
-                console.log('Сохранение статуса:', {
-                    id: statusData.id,
-                    name: statusData.name,
-                    description: statusData.description,
-                    escalationSLA: statusData.escalationSLA,
-                    notification: statusData.notification,
-                    comment: statusData.comment,
-                    dutyId: statusData.dutyId
-                });
-                await updateStatus(statusData);
+                let savedStatus;
+                if (isCreating) {
+                    savedStatus = await createStatus(statusData);
+                    navigate('/statuses');
+                } else {
+                    savedStatus = await updateStatus(statusData);
+                }
                 setIsEditing(false);
             } catch (error) {
                 console.error('Ошибка сохранения данных:', error);
@@ -63,7 +80,7 @@ const StatusDetailsPage: React.FC = () => {
                 updatedData[field] = value;
                 break;
             case 'escalationSLA':
-                updatedData.escalationSLA = parseInt(value);
+                updatedData.escalationSLA = parseInt(value) || 0;
                 break;
             case 'deliveryType':
                 updatedData.notification = {
@@ -74,7 +91,7 @@ const StatusDetailsPage: React.FC = () => {
             case 'pingInterval':
                 updatedData.notification = {
                     ...updatedData.notification,
-                    pingInterval: parseInt(value)
+                    pingInterval: parseInt(value) || 0
                 };
                 break;
             case 'commentText':
@@ -90,7 +107,7 @@ const StatusDetailsPage: React.FC = () => {
                 };
                 break;
             case 'dutyId':
-                updatedData.dutyId = parseInt(value);
+                updatedData.dutyId = parseInt(value) || 1;
                 break;
         }
 
@@ -100,12 +117,12 @@ const StatusDetailsPage: React.FC = () => {
     return (
         <Layout>
             <div className={'page-header'}>
-                <h1>Детали статуса</h1>
+                <h1>{isCreating ? 'Создание статуса' : 'Детали статуса'}</h1>
             </div>
             <div className={'page-content'}>
                 <Paper elevation={3} sx={formPaperStyles}>
                     {isLoading ? (
-                        <CircularProgress color="secondary" size={50} thickness={5} />
+                        <CircularProgress color="secondary" size={50} thickness={5}/>
                     ) : statusData ? (
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                             <TextField
@@ -136,7 +153,7 @@ const StatusDetailsPage: React.FC = () => {
                                 sx={formTextFieldStyles}
                             />
                             <TextField
-                                label="Тип доставки уведомления"
+                                label="Тип уведомления"
                                 value={statusData.notification.deliveryType}
                                 onChange={handleChange('deliveryType')}
                                 disabled={!isEditing}
@@ -180,7 +197,7 @@ const StatusDetailsPage: React.FC = () => {
                                 sx={formTextFieldStyles}
                             />
                             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
-                                {!isEditing ? (
+                                {!isEditing && !isCreating ? (
                                     <Button 
                                         variant="outlined" 
                                         onClick={() => setIsEditing(true)}
@@ -192,7 +209,13 @@ const StatusDetailsPage: React.FC = () => {
                                     <>
                                         <Button 
                                             variant="outlined" 
-                                            onClick={() => setIsEditing(false)}
+                                            onClick={() => {
+                                                if (isCreating) {
+                                                    navigate('/statuses');
+                                                } else {
+                                                    setIsEditing(false);
+                                                }
+                                            }}
                                             sx={formButtonStyles}
                                         >
                                             Отмена
@@ -202,13 +225,13 @@ const StatusDetailsPage: React.FC = () => {
                                             onClick={handleSave}
                                             sx={formButtonStyles}
                                         >
-                                            Сохранить
+                                            {isCreating ? 'Создать' : 'Сохранить'}
                                         </Button>
                                     </>
                                 )}
                             </Box>
                         </Box>
-                    ) : (
+                    ) : !isCreating && (
                         <div>Статус не найден</div>
                     )}
                 </Paper>

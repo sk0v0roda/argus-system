@@ -29,7 +29,7 @@ const GraphStatusPage = () => {
                 <h1>Графы статусов</h1>
             </div>
             <div className={'page-toolbar'}>
-                <Button>Создать</Button>
+                <Button onClick={() => navigate('/statusgraphs/new')}>Создать</Button>
             </div>
             <div className={'page-content'}>
                 <Paper elevation={3}

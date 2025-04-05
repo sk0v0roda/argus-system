@@ -79,12 +79,16 @@ function AppContent() {
                     }>
                         <Route path="/" element={<DashboardPage/>}/>
                         <Route path="/statusgraphs" element={<GraphStatusPage/>}/>
+                        <Route path="/statusgraphs/new" element={<GraphDetailsPage/>}/>
                         <Route path="/statusgraphs/:id" element={<GraphDetailsPage/>}/>
                         <Route path="/sensors" element={<SensorsPage/>}/>
+                        <Route path="/sensors/new" element={<SensorDetailsPage/>}/>
                         <Route path="/sensors/:id" element={<SensorDetailsPage/>}/>
                         <Route path="/duties" element={<DutyPage/>}/>
+                        <Route path="/duties/new" element={<DutyDetailsPage/>}/>
                         <Route path="/duties/:id" element={<DutyDetailsPage/>}/>
                         <Route path="/statuses" element={<StatusPage/>}/>
+                        <Route path="/statuses/new" element={<StatusDetailsPage/>}/>
                         <Route path="/statuses/:id" element={<StatusDetailsPage/>}/>
                         <Route path="*" element={<NotFoundPage/>}/>
                     </Route>

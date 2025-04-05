@@ -37,7 +37,7 @@ const DutyPage: React.FC = () => {
                 <h1>Дежурства</h1>
             </div>
             <div className={'page-toolbar'}>
-                <Button>Создать</Button>
+                <Button onClick={() => navigate('/duties/new')}>Создать</Button>
             </div>
             <div className={'page-content'}>
                 <Paper elevation={3} sx={formPaperStyles}>

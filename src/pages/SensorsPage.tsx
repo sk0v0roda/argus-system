@@ -33,7 +33,7 @@ const SensorsPage = () => {
                 <h1>Датчики</h1>
             </div>
             <div className={'page-toolbar'}>
-                <Button>Создать</Button>
+                <Button onClick={() => navigate('/sensors/new')}>Создать</Button>
             </div>
             <div className={'page-content'}>
                 <Paper elevation={3} sx={formPaperStyles}>

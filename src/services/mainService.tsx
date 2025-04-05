@@ -354,3 +354,55 @@ export const updateStatus = (status: Status): Promise<Status> => {
         }, 250);
     });
 }
+
+export const createSensor = (sensor: Omit<Sensor, 'id'>): Promise<Sensor> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve({
+                ...sensor,
+                id: Math.random().toString(36).substr(2, 9)
+            });
+        }, 250);
+    });
+};
+
+export const createDuty = (duty: Omit<Duty, 'id'>): Promise<Duty> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve({
+                ...duty,
+                id: Math.floor(Math.random() * 1000)
+            });
+        }, 250);
+    });
+};
+
+export const createStatus = (status: Omit<Status, 'id'>): Promise<Status> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve({
+                ...status,
+                id: Math.random().toString(36).substr(2, 9)
+            });
+        }, 250);
+    });
+};
+
+export const createStatusGraph = (graph: Omit<StatusGraph, 'id'>): Promise<StatusGraph> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve({
+                ...graph,
+                id: Math.random().toString(36).substr(2, 9)
+            });
+        }, 250);
+    });
+};
+
+export const updateStatusGraph = (graph: StatusGraph): Promise<StatusGraph> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve(graph);
+        }, 250);
+    });
+};

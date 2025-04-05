@@ -19,9 +19,10 @@ import Button from './ui/Button';
 interface StatusGraphEditorProps {
     graph: StatusGraph;
     onSave: (graph: StatusGraph) => void;
+    isEditing?: boolean;
 }
 
-const StatusGraphEditor: React.FC<StatusGraphEditorProps> = ({ graph, onSave }) => {
+const StatusGraphEditor: React.FC<StatusGraphEditorProps> = ({ graph, onSave, isEditing = true }) => {
     const [nodes, setNodes, onNodesChange] = useNodesState(graph.nodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(graph.edges);
     const [isAddNodeDialogOpen, setIsAddNodeDialogOpen] = useState(false);
@@ -68,23 +69,25 @@ const StatusGraphEditor: React.FC<StatusGraphEditorProps> = ({ graph, onSave }) 
                         animated: true,
                         style: { stroke: '#666', strokeWidth: 2 }
                     }}
-                    nodesDraggable={true}
-                    nodesConnectable={true}
-                    elementsSelectable={true}
+                    nodesDraggable={isEditing}
+                    nodesConnectable={isEditing}
+                    elementsSelectable={isEditing}
                     minZoom={0.1}
                     maxZoom={4}
                     attributionPosition="bottom-right"
                 >
                     <Background />
                     <Controls />
-                    <Panel position="top-right" style={{ display: 'flex', gap: '8px' }}>
-                        <Button onClick={() => { console.log("Opening dialog"); setIsAddNodeDialogOpen(true); }}>
-                            Добавить узел
-                        </Button>
-                        <Button onClick={() => { console.log("Saving changes"); handleSave(); }}>
-                            Сохранить изменения
-                        </Button>
-                    </Panel>
+                    {isEditing && (
+                        <Panel position="top-right" style={{ display: 'flex', gap: '8px' }}>
+                            <Button onClick={() => setIsAddNodeDialogOpen(true)}>
+                                Добавить узел
+                            </Button>
+                            <Button onClick={handleSave}>
+                                Сохранить изменения
+                            </Button>
+                        </Panel>
+                    )}
                 </ReactFlow>
             </Box>
 

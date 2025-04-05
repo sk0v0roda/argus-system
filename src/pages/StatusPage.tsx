@@ -35,7 +35,7 @@ const StatusPage: React.FC = () => {
                 <h1>Статусы</h1>
             </div>
             <div className={'page-toolbar'}>
-                <Button>Создать</Button>
+                <Button onClick={() => navigate('/statuses/new')}>Создать</Button>
             </div>
             <div className={'page-content'}>
                 <Paper elevation={3} sx={formPaperStyles}>

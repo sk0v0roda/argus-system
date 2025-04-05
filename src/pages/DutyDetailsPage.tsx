@@ -1,21 +1,45 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Duty, getDutyById, updateDuty } from '../services/mainService';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Duty, getDutyById, updateDuty, createDuty } from '../services/mainService';
 import Layout from "src/components/Layout";
 import { CircularProgress, Paper, TextField, Button, Box } from "@mui/material";
 import { formTextFieldStyles, formPaperStyles, formButtonStyles } from "src/styles/formStyles";
 
 const DutyDetailsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
     const [dutyData, setDutyData] = useState<Duty | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
+    const isCreating = !id;
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 if (!id) {
-                    throw new Error('ID дежурства не указан');
+                    // Создание нового дежурства
+                    setDutyData({
+                        id: undefined,
+                        start_time: new Date(),
+                        interval: {
+                            seconds: 28800, // 8 часов по умолчанию
+                            zero: false,
+                            nano: 0,
+                            negative: false,
+                            positive: true,
+                            units: [
+                                {
+                                    durationEstimated: false,
+                                    timeBased: true,
+                                    dateBased: false
+                                }
+                            ]
+                        },
+                        ids: []
+                    });
+                    setIsEditing(true);
+                    setIsLoading(false);
+                    return;
                 }
 
                 const data = await getDutyById(parseInt(id));
@@ -33,13 +57,13 @@ const DutyDetailsPage: React.FC = () => {
     const handleSave = async () => {
         if (dutyData) {
             try {
-                console.log('Сохранение дежурства:', {
-                    id: dutyData.id,
-                    start_time: dutyData.start_time,
-                    duration: dutyData.interval.seconds / 3600,
-                    employeeIds: dutyData.ids
-                });
-                await updateDuty(dutyData);
+                let savedDuty;
+                if (isCreating) {
+                    savedDuty = await createDuty(dutyData);
+                    navigate('/duties');
+                } else {
+                    savedDuty = await updateDuty(dutyData);
+                }
                 setIsEditing(false);
             } catch (error) {
                 console.error('Ошибка сохранения данных:', error);
@@ -56,10 +80,10 @@ const DutyDetailsPage: React.FC = () => {
 
         switch (field) {
             case 'start_time':
-                updatedData.start_time = new Date(value);
+                updatedData.start_time = value ? new Date(value) : new Date();
                 break;
             case 'duration':
-                const hours = parseFloat(value);
+                const hours = parseFloat(value) || 0;
                 updatedData.interval = {
                     ...updatedData.interval,
                     seconds: hours * 3600
