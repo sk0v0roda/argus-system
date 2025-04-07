@@ -2,44 +2,43 @@ import {useCallback, useEffect, useState} from "react";
 import Layout from "src/components/Layout";
 import Button from "src/components/ui/Button";
 import {List, Paper, TextField, ListItem, ListItemText, CircularProgress} from "@mui/material";
-import {getStatusGraphs, StatusGraph} from "src/services/statusService";
+import {getProcesses, Process} from "src/services/processService";
 import {useNavigate} from "react-router-dom";
 import {formTextFieldStyles} from "src/styles/formStyles";
 
-const GraphStatusPage = () => {
-    const [statusGraphs, setStatusGraphs] = useState<StatusGraph[]>([]);
+const ProcessPage = () => {
+    const [processes, setProcesses] = useState<Process[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+
     useEffect(() => {
         setIsLoading(true);
-        getStatusGraphs().then((data) => {
+        getProcesses().then((data) => {
             setIsLoading(false);
-            return setStatusGraphs(data)
+            return setProcesses(data)
         });
     }, []);
 
-// Состояние для хранения поискового запроса
     const [searchQuery, setSearchQuery] = useState('');
-// Фильтрация элементов по поисковому запросу
-    const filteredItems = statusGraphs.filter((item) =>
+    const filteredItems = processes.filter((item) =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
     return (
         <Layout>
             <div className={'page-header'}>
-                <h1>Графы статусов</h1>
+                <h1>Процессы</h1>
             </div>
             <div className={'page-toolbar'}>
-                <Button onClick={() => navigate('/statusgraphs/new')}>Создать</Button>
+                <Button onClick={() => navigate('/processes/new')}>Создать</Button>
             </div>
             <div className={'page-content'}>
                 <Paper elevation={3}
                        sx={{
-                           backgroundColor: 'var(--card-background)', // Используем CSS-переменную
+                           backgroundColor: 'var(--card-background)',
                            border: '1px solid var(--border-color)',
                            padding: '16px',
                        }}>
-                    {/* Поле поиска */}
                     <TextField
                         label="Поиск"
                         variant="outlined"
@@ -51,7 +50,6 @@ const GraphStatusPage = () => {
                         sx={formTextFieldStyles}
                     />
 
-                    {/* Список элементов */}
                     <List>
                         <>
                             {isLoading && <CircularProgress color="secondary" size={50} thickness={5}/>}
@@ -59,17 +57,20 @@ const GraphStatusPage = () => {
                                 <ListItem
                                     key={index}
                                     className={'list-item'}
-                                    onClick={() => navigate(`/statusgraphs/${item.id}`)}
+                                    onClick={() => navigate(`/processes/${item.id}`)}
                                 >
-                                    <ListItemText primary={item.name}/>
+                                    <ListItemText 
+                                        primary={item.name}
+                                        secondary={item.description}
+                                    />
                                 </ListItem>
                             ))}
                         </>
                     </List>
                 </Paper>
             </div>
-
         </Layout>
     );
 };
-export default GraphStatusPage;
+
+export default ProcessPage; 

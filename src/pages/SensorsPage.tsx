@@ -1,9 +1,9 @@
 import {useLocation} from "react-router-dom";
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import Layout from "src/components/Layout";
 import Button from "src/components/ui/Button";
 import {CircularProgress, List, ListItem, ListItemText, Paper, TextField} from "@mui/material";
-import {getSensors, Sensor} from "src/services/mainService";
+import {getSensors, Sensor} from "src/services/sensorService";
 import {useNavigate} from "react-router-dom";
 import { formPaperStyles, formTextFieldStyles, listItemStyles } from "src/styles/formStyles";
 

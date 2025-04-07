@@ -13,7 +13,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Box, Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button as MuiButton } from '@mui/material';
-import { StatusGraph } from '../services/mainService';
+import { StatusGraph } from '../services/statusService';
 import Button from './ui/Button';
 
 interface StatusGraphEditorProps {

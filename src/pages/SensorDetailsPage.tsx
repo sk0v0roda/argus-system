@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import Layout from "src/components/Layout";
 import {CircularProgress, Paper, TextField, Button, Box} from "@mui/material";
-import {getSensorById, updateSensor, createSensor, Sensor} from "src/services/mainService";
+import {Sensor, getSensorById, updateSensor, createSensor} from "src/services/sensorService";
 import {formTextFieldStyles, formPaperStyles, formButtonStyles} from "src/styles/formStyles";
 
 const SensorDetailsPage = () => {
@@ -91,7 +91,7 @@ const SensorDetailsPage = () => {
                                 sx={formTextFieldStyles}
                             />
                             <TextField
-                                label="Описание"
+                                label="Описание"    
                                 value={sensorData.ticketDescription}
                                 onChange={handleChange('ticketDescription')}
                                 disabled={!isEditing}

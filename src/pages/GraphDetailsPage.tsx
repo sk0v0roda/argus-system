@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import Layout from "src/components/Layout";
 import {CircularProgress, Paper, Button, Box, Dialog, DialogTitle, DialogContent, TextField, DialogActions} from "@mui/material";
-import {getStatusGraphById, updateStatusGraph, createStatusGraph, StatusGraph} from "src/services/mainService";
+import {getStatusGraphById, updateStatusGraph, createStatusGraph, StatusGraph} from "src/services/statusService";
 import StatusGraphEditor from "src/components/StatusGraphEditor";
 import {formPaperStyles, formButtonStyles, formTextFieldStyles} from "src/styles/formStyles";
 

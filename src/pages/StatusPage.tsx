@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Status, getStatuses } from '../services/mainService';
+import { Status, getStatuses } from '../services/statusService';
 import { useNavigate } from 'react-router-dom';
 import Layout from "src/components/Layout";
 import Button from "src/components/ui/Button";

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Duty, getDutyById, updateDuty, createDuty } from '../services/mainService';
+import { Duty, getDutyById, updateDuty, createDuty } from '../services/dutyService';
 import Layout from "src/components/Layout";
 import { CircularProgress, Paper, TextField, Button, Box } from "@mui/material";
 import { formTextFieldStyles, formPaperStyles, formButtonStyles } from "src/styles/formStyles";

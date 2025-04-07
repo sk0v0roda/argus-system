@@ -21,7 +21,7 @@ import { store } from './store/store';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from './store/store';
 import { logout, login } from './store/slices/authSlice';
-
+import ProcessPage from '../src/pages/ProcessPage';
 const ProtectedRoute = () => {
     const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
     return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
@@ -90,6 +90,7 @@ function AppContent() {
                         <Route path="/statuses" element={<StatusPage/>}/>
                         <Route path="/statuses/new" element={<StatusDetailsPage/>}/>
                         <Route path="/statuses/:id" element={<StatusDetailsPage/>}/>
+                        <Route path="/processes" element={<ProcessPage/>}/>
                         <Route path="*" element={<NotFoundPage/>}/>
                     </Route>
                 </Route>
