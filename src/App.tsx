@@ -24,7 +24,7 @@ import { logout, login } from './store/slices/authSlice';
 import ProcessPage from '../src/pages/ProcessPage';
 import ProcessCreatePage from '../src/pages/ProcessCreatePage';
 import ProcessDetailsPage from './pages/ProcessDetailsPage';
-1
+
 const ProtectedRoute = () => {
     const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
     return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
