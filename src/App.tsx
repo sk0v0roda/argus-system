@@ -22,6 +22,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from './store/store';
 import { logout, login } from './store/slices/authSlice';
 import ProcessPage from '../src/pages/ProcessPage';
+import ProcessCreatePage from '../src/pages/ProcessCreatePage';
+import ProcessDetailsPage from './pages/ProcessDetailsPage';
+1
 const ProtectedRoute = () => {
     const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
     return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
@@ -91,6 +94,8 @@ function AppContent() {
                         <Route path="/statuses/new" element={<StatusDetailsPage/>}/>
                         <Route path="/statuses/:id" element={<StatusDetailsPage/>}/>
                         <Route path="/processes" element={<ProcessPage/>}/>
+                        <Route path="/processes/new" element={<ProcessCreatePage/>}/>
+                        <Route path="/processes/:id" element={<ProcessDetailsPage/>}/>
                         <Route path="*" element={<NotFoundPage/>}/>
                     </Route>
                 </Route>

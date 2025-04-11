@@ -28,13 +28,11 @@ export interface Ticket {
 export interface Comment {
     "id": string,
     "text": string,
-    "mentionedUsers": [
-        {
-            "id": number,
-            "name": string,
-            "avatar": string
-        }
-    ],
+    "mentionedUsers": {
+        "id": number,
+        "name": string,
+        "avatar": string
+    }[],
     "author": {
         "id": number,
         "name": string,
@@ -113,6 +111,24 @@ export const createTicket = (ticket: Omit<Ticket, 'id'>): Promise<Ticket> => {
             resolve({
                 ...ticket,
                 id: Math.random().toString(36).substr(2, 9)
+            });
+        }, 250);
+    });
+};
+
+export const postComment = (ticketId: string, commentText: string): Promise<Comment> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve({
+                id: Math.random().toString(36).substr(2, 9),
+                text: commentText,
+                mentionedUsers: [],
+                author: {
+                    id: 1,
+                    name: 'Иван Иванов',
+                    avatar: ''
+                },
+                createdAt: new Date()
             });
         }, 250);
     });

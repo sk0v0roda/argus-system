@@ -27,6 +27,7 @@ const Sidebar: React.FC = () => {
                 <NavbarButton iconClass={'navbar-icon-sensors'} name={'Датчики'} to={'/sensors'}></NavbarButton>
                 <NavbarButton iconClass={'navbar-icon-people'} name={'Дежурства'} to={'/duties'}></NavbarButton>
                 <NavbarButton iconClass={'navbar-icon-notifications'} name={'Статусы'} to={'/statuses'}></NavbarButton>
+                <NavbarButton iconClass={'navbar-icon-process'} name={'Процессы'} to={'/processes'}></NavbarButton>
             </div>
         </Container>
     );
