@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Duty, getDutyById, updateDuty, createDuty } from '../services/dutyService';
+import { User, getUsers } from '../services/userService';
 import Layout from "src/components/Layout";
-import { CircularProgress, Paper, TextField, Button, Box } from "@mui/material";
+import { CircularProgress, Paper, TextField, Button, Box, Autocomplete, Chip } from "@mui/material";
 import { formTextFieldStyles, formPaperStyles, formButtonStyles } from "src/styles/formStyles";
 
 const DutyDetailsPage: React.FC = () => {
@@ -11,6 +12,8 @@ const DutyDetailsPage: React.FC = () => {
     const [dutyData, setDutyData] = useState<Duty | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
+    const [users, setUsers] = useState<User[]>([]);
+    const [isUsersLoading, setIsUsersLoading] = useState(true);
     const isCreating = !id;
 
     useEffect(() => {
@@ -51,7 +54,19 @@ const DutyDetailsPage: React.FC = () => {
             }
         };
 
+        const fetchUsers = async () => {
+            try {
+                const usersList = await getUsers();
+                setUsers(usersList);
+            } catch (error) {
+                console.error('Ошибка загрузки пользователей:', error);
+            } finally {
+                setIsUsersLoading(false);
+            }
+        };
+
         fetchData();
+        fetchUsers();
     }, [id]);
 
     const handleSave = async () => {
@@ -71,7 +86,7 @@ const DutyDetailsPage: React.FC = () => {
         }
     };
 
-    const handleChange = (field: keyof Duty | 'duration' | 'employeeIds') => 
+    const handleChange = (field: keyof Duty | 'duration') => 
     (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!dutyData) return;
 
@@ -89,18 +104,28 @@ const DutyDetailsPage: React.FC = () => {
                     seconds: hours * 3600
                 };
                 break;
-            case 'employeeIds':
-                updatedData.ids = value.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
-                break;
         }
 
         setDutyData(updatedData);
     };
 
+    const handleUserChange = (event: React.SyntheticEvent, newValue: User[]) => {
+        if (!dutyData) return;
+        
+        setDutyData({
+            ...dutyData,
+            ids: newValue.map(user => user.id)
+        });
+    };
+
+    const getSelectedUsers = () => {
+        return users.filter(user => dutyData?.ids.includes(user.id));
+    };
+
     return (
         <Layout>
             <div className={'page-header'}>
-                <h1>Детали дежурства</h1>
+                <h1>{isCreating ? 'Создание дежурства' : 'Детали дежурства'}</h1>
             </div>
             <div className={'page-content'}>
                 <Paper elevation={3} sx={formPaperStyles}>
@@ -134,16 +159,35 @@ const DutyDetailsPage: React.FC = () => {
                                 }}
                                 sx={formTextFieldStyles}
                             />
-                            <TextField
-                                label="ID сотрудников (через запятую)"
-                                value={dutyData.ids.join(', ')}
-                                onChange={handleChange('employeeIds')}
-                                disabled={!isEditing}
-                                fullWidth
-                                sx={formTextFieldStyles}
+                            <Autocomplete
+                                multiple
+                                value={getSelectedUsers()}
+                                onChange={handleUserChange}
+                                options={users}
+                                getOptionLabel={(option) => option.name}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Сотрудники"
+                                        disabled={!isEditing || isUsersLoading}
+                                        sx={formTextFieldStyles}
+                                    />
+                                )}
+                                renderTags={(value, getTagProps) =>
+                                    value.map((option, index) => (
+                                        <Chip
+                                            label={option.name}
+                                            {...getTagProps({ index })}
+                                        />
+                                    ))
+                                }
+                                loading={isUsersLoading}
+                                loadingText="Загрузка..."
+                                noOptionsText="Ничего не найдено"
+                                isOptionEqualToValue={(option, value) => option.id === value.id}
                             />
                             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
-                                {!isEditing ? (
+                                {!isEditing && !isCreating ? (
                                     <Button 
                                         variant="outlined" 
                                         onClick={() => setIsEditing(true)}
@@ -155,7 +199,13 @@ const DutyDetailsPage: React.FC = () => {
                                     <>
                                         <Button 
                                             variant="outlined" 
-                                            onClick={() => setIsEditing(false)}
+                                            onClick={() => {
+                                                if (isCreating) {
+                                                    navigate('/duties');
+                                                } else {
+                                                    setIsEditing(false);
+                                                }
+                                            }}
                                             sx={formButtonStyles}
                                         >
                                             Отмена
@@ -165,13 +215,13 @@ const DutyDetailsPage: React.FC = () => {
                                             onClick={handleSave}
                                             sx={formButtonStyles}
                                         >
-                                            Сохранить
+                                            {isCreating ? 'Создать' : 'Сохранить'}
                                         </Button>
                                     </>
                                 )}
                             </Box>
                         </Box>
-                    ) : (
+                    ) : !isCreating && (
                         <div>Дежурство не найдено</div>
                     )}
                 </Paper>

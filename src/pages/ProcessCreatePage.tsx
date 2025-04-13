@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Process, createProcess } from '../services/processService';
 import { StatusGraph, getStatusGraphs } from '../services/statusService';
 import Layout from "src/components/Layout";
-import { CircularProgress, Paper, TextField, Button, Box, MenuItem, Select, FormControl, InputLabel, SelectChangeEvent } from "@mui/material";
+import { CircularProgress, Paper, TextField, Button, Box, Autocomplete } from "@mui/material";
 import { formTextFieldStyles, formPaperStyles, formButtonStyles } from "src/styles/formStyles";
 
 const ProcessCreatePage: React.FC = () => {
@@ -46,11 +46,15 @@ const ProcessCreatePage: React.FC = () => {
         }));
     };
 
-    const handleSelectChange = (event: SelectChangeEvent<string>) => {
+    const handleGraphChange = (event: React.SyntheticEvent, newValue: StatusGraph | null) => {
         setProcessData(prev => ({
             ...prev,
-            graphId: event.target.value
+            graphId: newValue?.id || ''
         }));
+    };
+
+    const getSelectedGraph = () => {
+        return statusGraphs.find(graph => graph.id === processData.graphId) || null;
     };
 
     const handleSave = async () => {
@@ -90,28 +94,24 @@ const ProcessCreatePage: React.FC = () => {
                             rows={4}
                             sx={formTextFieldStyles}
                         />
-                        <FormControl fullWidth>
-                            <InputLabel>Граф статусов</InputLabel>
-                            <Select
-                                value={processData.graphId}
-                                onChange={handleSelectChange}
-                                label="Граф статусов"
-                                disabled={isGraphsLoading}
-                                sx={formTextFieldStyles}
-                            >
-                                {isGraphsLoading ? (
-                                    <MenuItem value="">
-                                        <CircularProgress size={20} />
-                                    </MenuItem>
-                                ) : (
-                                    statusGraphs.map(graph => (
-                                        <MenuItem key={graph.id} value={graph.id}>
-                                            {graph.name}
-                                        </MenuItem>
-                                    ))
-                                )}
-                            </Select>
-                        </FormControl>
+                        <Autocomplete
+                            value={getSelectedGraph()}
+                            onChange={handleGraphChange}
+                            options={statusGraphs}
+                            getOptionLabel={(option) => option.name}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label="Граф статусов"
+                                    disabled={isGraphsLoading}
+                                    sx={formTextFieldStyles}
+                                />
+                            )}
+                            loading={isGraphsLoading}
+                            loadingText="Загрузка..."
+                            noOptionsText="Ничего не найдено"
+                            isOptionEqualToValue={(option, value) => option.id === value.id}
+                        />
                         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
                             <Button 
                                 variant="outlined" 

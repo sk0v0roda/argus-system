@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import Layout from "src/components/Layout";
-import {CircularProgress, Paper, TextField, Button, Box} from "@mui/material";
+import {CircularProgress, Paper, TextField, Button, Box, Autocomplete} from "@mui/material";
 import {Sensor, getSensorById, updateSensor, createSensor} from "src/services/sensorService";
+import {Process, getProcesses} from "src/services/processService";
 import {formTextFieldStyles, formPaperStyles, formButtonStyles} from "src/styles/formStyles";
 
 const SensorDetailsPage = () => {
@@ -11,6 +12,8 @@ const SensorDetailsPage = () => {
     const [sensorData, setSensorData] = useState<Sensor | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
+    const [processes, setProcesses] = useState<Process[]>([]);
+    const [isProcessesLoading, setIsProcessesLoading] = useState(true);
     const isCreating = !id;
 
     useEffect(() => {
@@ -40,7 +43,19 @@ const SensorDetailsPage = () => {
             }
         };
 
+        const fetchProcesses = async () => {
+            try {
+                const processesList = await getProcesses();
+                setProcesses(processesList);
+            } catch (error) {
+                console.error('Ошибка загрузки процессов:', error);
+            } finally {
+                setIsProcessesLoading(false);
+            }
+        };
+
         fetchData();
+        fetchProcesses();
     }, [id]);
 
     const handleSave = async () => {
@@ -69,6 +84,19 @@ const SensorDetailsPage = () => {
                     : event.target.value
             });
         }
+    };
+
+    const handleProcessChange = (event: React.SyntheticEvent, newValue: Process | null) => {
+        if (sensorData && newValue) {
+            setSensorData({
+                ...sensorData,
+                businessProcessId: newValue.id
+            });
+        }
+    };
+
+    const getSelectedProcess = () => {
+        return processes.find(p => p.id === sensorData?.businessProcessId) || null;
     };
 
     return (
@@ -120,13 +148,23 @@ const SensorDetailsPage = () => {
                                 }}
                                 sx={formTextFieldStyles}
                             />
-                            <TextField
-                                label="ID бизнес-процесса"
-                                value={sensorData.businessProcessId}
-                                onChange={handleChange('businessProcessId')}
-                                disabled={!isEditing}
-                                fullWidth
-                                sx={formTextFieldStyles}
+                            <Autocomplete
+                                value={getSelectedProcess()}
+                                onChange={handleProcessChange}
+                                options={processes}
+                                getOptionLabel={(option) => option.name}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Бизнес-процесс"
+                                        disabled={!isEditing || isProcessesLoading}
+                                        sx={formTextFieldStyles}
+                                    />
+                                )}
+                                loading={isProcessesLoading}
+                                loadingText="Загрузка..."
+                                noOptionsText="Ничего не найдено"
+                                isOptionEqualToValue={(option, value) => option.id === value.id}
                             />
                             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
                                 {!isEditing && !isCreating ? (

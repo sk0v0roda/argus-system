@@ -1,4 +1,5 @@
 import {Node, Edge} from "@xyflow/react";
+import { api, getApiUrl } from './api';
 
 export interface StatusGraph {
     id: string;

@@ -32,16 +32,16 @@ const ProtectedRoute = () => {
 
 function AppContent() {
     const dispatch = useDispatch();
-    const username = useSelector((state: RootState) => state.auth.username);
+    const email = useSelector((state: RootState) => state.auth.email);
 
-    const handleLogin = (username: string) => {
-        dispatch(login(username));
+    const handleLogin = (email: string, token: string) => {
+        dispatch(login({ email, token }));
     };
 
-    const handleRegister = (username: string, password: string, confirmPassword: string) => {
+    const handleRegister = (email: string, password: string, confirmPassword: string) => {
         // Здесь будет логика регистрации
         // Пока просто логиним пользователя
-        dispatch(login(username));
+        dispatch(login({ email, token: 'temp_token' }));
     };
 
     const handleLogout = () => {
@@ -51,12 +51,8 @@ function AppContent() {
     return (
         <Container fluid className="p-0">
             <Routes>
-                <Route path="/login" element={
-                    <LoginPage onLogin={handleLogin} />
-                } />
-                <Route path="/register" element={
-                    <RegisterPage onRegister={handleRegister} />
-                } />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage onRegister={handleRegister} />} />
 
                 <Route element={<ProtectedRoute />}>
                     <Route element={
@@ -70,7 +66,7 @@ function AppContent() {
                                         <div className={'profile-picture'}></div>
                                     </div>
                                     <div className={'username'}>
-                                        {username || 'Гость'}
+                                        {email || 'Гость'}
                                     </div>
                                     <button onClick={handleLogout}>
                                         <div className={'logout-button'}>Выйти</div>

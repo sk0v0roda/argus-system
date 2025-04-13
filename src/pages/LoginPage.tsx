@@ -3,33 +3,32 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { RootState } from '../store/store';
 import { setTheme } from '../store/slices/themeSlice';
+import { login as loginService } from '../services/userService';
+import { login } from '../store/slices/authSlice';
 
-interface LoginPageProps {
-    onLogin: (username: string) => void;
-}
-
-const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
-    const [username, setUsername] = useState('');
+const LoginPage: React.FC = () => {
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const isDarkTheme = useSelector((state: RootState) => state.theme.isDarkTheme);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
 
-        if (!username || !password) {
+        if (!email || !password) {
             setError('Пожалуйста, заполните все поля');
             return;
         }
 
         try {
-            onLogin(username);
+            const response = await loginService(email, password);
+            dispatch(login({ email, token: response.token }));
             navigate('/');
         } catch (err) {
-            setError('Ошибка входа. Проверьте логин и пароль.');
+            setError('Ошибка входа. Проверьте email и пароль.');
         }
     };
 
@@ -40,10 +39,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             <form onSubmit={handleSubmit}>
                 <div className="input-group">
                     <input
-                        type="text"
-                        placeholder="Логин"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                     />
                 </div>
                 <div className="input-group">

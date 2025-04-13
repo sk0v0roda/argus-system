@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Status, getStatusById, updateStatus, createStatus } from '../services/statusService';
+import { User, getUsers } from '../services/userService';
+import { Duty, getDuties } from '../services/dutyService';
 import Layout from "src/components/Layout";
-import { CircularProgress, Paper, TextField, Button, Box } from "@mui/material";
+import { CircularProgress, Paper, TextField, Button, Box, Autocomplete, Chip } from "@mui/material";
 import { formTextFieldStyles, formPaperStyles, formButtonStyles } from "src/styles/formStyles";
 
 const StatusDetailsPage: React.FC = () => {
@@ -11,6 +13,10 @@ const StatusDetailsPage: React.FC = () => {
     const [statusData, setStatusData] = useState<Status | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
+    const [users, setUsers] = useState<User[]>([]);
+    const [duties, setDuties] = useState<Duty[]>([]);
+    const [isUsersLoading, setIsUsersLoading] = useState(true);
+    const [isDutiesLoading, setIsDutiesLoading] = useState(true);
     const isCreating = !id;
 
     useEffect(() => {
@@ -47,7 +53,31 @@ const StatusDetailsPage: React.FC = () => {
             }
         };
 
+        const fetchUsers = async () => {
+            try {
+                const usersList = await getUsers();
+                setUsers(usersList);
+            } catch (error) {
+                console.error('Ошибка загрузки пользователей:', error);
+            } finally {
+                setIsUsersLoading(false);
+            }
+        };
+
+        const fetchDuties = async () => {
+            try {
+                const dutiesList = await getDuties();
+                setDuties(dutiesList);
+            } catch (error) {
+                console.error('Ошибка загрузки дежурств:', error);
+            } finally {
+                setIsDutiesLoading(false);
+            }
+        };
+
         fetchData();
+        fetchUsers();
+        fetchDuties();
     }, [id]);
 
     const handleSave = async () => {
@@ -67,7 +97,7 @@ const StatusDetailsPage: React.FC = () => {
         }
     };
 
-    const handleChange = (field: keyof Status | 'deliveryType' | 'pingInterval' | 'commentText' | 'userIds') => 
+    const handleChange = (field: keyof Status | 'deliveryType' | 'pingInterval' | 'commentText') => 
     (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!statusData) return;
 
@@ -100,18 +130,38 @@ const StatusDetailsPage: React.FC = () => {
                     text: value
                 };
                 break;
-            case 'userIds':
-                updatedData.comment = {
-                    ...updatedData.comment,
-                    userIds: value.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id))
-                };
-                break;
-            case 'dutyId':
-                updatedData.dutyId = parseInt(value) || 1;
-                break;
         }
 
         setStatusData(updatedData);
+    };
+
+    const handleUserChange = (event: React.SyntheticEvent, newValue: User[]) => {
+        if (!statusData) return;
+        
+        setStatusData({
+            ...statusData,
+            comment: {
+                ...statusData.comment,
+                userIds: newValue.map(user => user.id)
+            }
+        });
+    };
+
+    const handleDutyChange = (event: React.SyntheticEvent, newValue: Duty | null) => {
+        if (!statusData) return;
+        
+        setStatusData({
+            ...statusData,
+            dutyId: newValue?.id || 1
+        });
+    };
+
+    const getSelectedUsers = () => {
+        return users.filter(user => statusData?.comment.userIds.includes(user.id));
+    };
+
+    const getSelectedDuty = () => {
+        return duties.find(duty => duty.id === statusData?.dutyId) || null;
     };
 
     return (
@@ -179,22 +229,50 @@ const StatusDetailsPage: React.FC = () => {
                                 rows={2}
                                 sx={formTextFieldStyles}
                             />
-                            <TextField
-                                label="ID пользователей (через запятую)"
-                                value={statusData.comment.userIds.join(', ')}
-                                onChange={handleChange('userIds')}
-                                disabled={!isEditing}
-                                fullWidth
-                                sx={formTextFieldStyles}
+                            <Autocomplete
+                                multiple
+                                value={getSelectedUsers()}
+                                onChange={handleUserChange}
+                                options={users}
+                                getOptionLabel={(option) => option.name}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Пользователи"
+                                        disabled={!isEditing || isUsersLoading}
+                                        sx={formTextFieldStyles}
+                                    />
+                                )}
+                                renderTags={(value, getTagProps) =>
+                                    value.map((option, index) => (
+                                        <Chip
+                                            label={option.name}
+                                            {...getTagProps({ index })}
+                                        />
+                                    ))
+                                }
+                                loading={isUsersLoading}
+                                loadingText="Загрузка..."
+                                noOptionsText="Ничего не найдено"
+                                isOptionEqualToValue={(option, value) => option.id === value.id}
                             />
-                            <TextField
-                                label="ID дежурства"
-                                type="number"
-                                value={statusData.dutyId}
-                                onChange={handleChange('dutyId')}
-                                disabled={!isEditing}
-                                fullWidth
-                                sx={formTextFieldStyles}
+                            <Autocomplete
+                                value={getSelectedDuty()}
+                                onChange={handleDutyChange}
+                                options={duties}
+                                getOptionLabel={(option) => `Дежурство #${option.id} (${new Date(option.start_time).toLocaleString()})`}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Дежурство"
+                                        disabled={!isEditing || isDutiesLoading}
+                                        sx={formTextFieldStyles}
+                                    />
+                                )}
+                                loading={isDutiesLoading}
+                                loadingText="Загрузка..."
+                                noOptionsText="Ничего не найдено"
+                                isOptionEqualToValue={(option, value) => option.id === value.id}
                             />
                             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
                                 {!isEditing && !isCreating ? (
