@@ -15,6 +15,7 @@ const GraphDetailsPage = () => {
     const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
     const [graphToSave, setGraphToSave] = useState<StatusGraph | null>(null);
     const [graphName, setGraphName] = useState('');
+    const [graphDescription, setGraphDescription] = useState('');
     const isCreating = !id;
 
     useEffect(() => {
@@ -25,6 +26,7 @@ const GraphDetailsPage = () => {
                     setGraphData({
                         id: '',
                         name: '',
+                        description: '',
                         nodes: [],
                         edges: []
                     });
@@ -49,6 +51,7 @@ const GraphDetailsPage = () => {
         if (isCreating) {
             setGraphToSave(updatedGraph);
             setGraphName('');
+            setGraphDescription('');
             setIsSaveDialogOpen(true);
         } else {
             try {
@@ -64,9 +67,15 @@ const GraphDetailsPage = () => {
         if (!graphToSave || !graphName.trim()) return;
 
         try {
+            console.log('Создаваемый граф:', {
+                ...graphToSave,
+                name: graphName,
+                description: graphDescription
+            });
             await createStatusGraph({
                 ...graphToSave,
-                name: graphName
+                name: graphName,
+                description: graphDescription
             });
             setIsSaveDialogOpen(false);
             navigate('/statusgraphs');
@@ -133,6 +142,17 @@ const GraphDetailsPage = () => {
                         variant="outlined"
                         value={graphName}
                         onChange={(e) => setGraphName(e.target.value)}
+                        sx={formTextFieldStyles}
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Описание графа"
+                        fullWidth
+                        variant="outlined"
+                        multiline
+                        rows={4}
+                        value={graphDescription}
+                        onChange={(e) => setGraphDescription(e.target.value)}
                         sx={formTextFieldStyles}
                     />
                 </DialogContent>

@@ -1,49 +1,49 @@
 export interface Ticket {
-    "id": string,
-    "name": string,
-    "description": string,
-    "priority": number,
-    "deadline": Date,
-    "createdAt": Date,
-    "updatedAt": Date,
-    "author": {
-        "id": number,
-        "name": string,
-        "avatar": string
+    id: string,
+    name: string,
+    description: string,
+    priority: number,
+    deadline: Date,
+    createdAt: Date,
+    updatedAt: Date,
+    author: {
+        id: number,
+        name: string,
+        avatar: string
     },
-    "executor": {
-        "id": number,
-        "name": string,
-        "avatar": string
+    executor: {
+        id: number,
+        name: string,
+        avatar: string
     },
-    "status": {
-        "id": string,
-        "name": string,
-        "description": string,
-        "transitions": Transition[]
+    status: {
+        id: string,
+        name: string,
+        description: string,
+        transitions: Transition[]
     },
-    "comments": Comment[]
+    comments: Comment[]
 }
 
 export interface Comment {
-    "id": string,
-    "text": string,
-    "mentionedUsers": {
-        "id": number,
-        "name": string,
-        "avatar": string
+    id: string,
+    text: string,
+    mentionedUsers: {
+        id: number,
+        name: string,
+        avatar: string
     }[],
-    "author": {
-        "id": number,
-        "name": string,
-        "avatar": string
+    author: {
+        id: number,
+        name: string,
+        avatar: string
     },
-    "createdAt": Date
+    createdAt: Date
 }
 
 export interface Transition {
-    "toStatusId": string,
-    "name": string
+    toStatusId: string,
+    name: string
 }
 
 export const getTickets = (): Promise<Ticket[]> => {

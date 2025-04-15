@@ -4,24 +4,35 @@ import { api, getApiUrl } from './api';
 export interface StatusGraph {
     id: string;
     name: string;
+    description: string;
     nodes: Node[];
     edges: Edge[];
 }
 
+export interface StatusGraphDTO {
+    name: string;
+    description: string;
+    vertexes: string[];
+    edges: {
+        from: string;
+        to: string;
+    }[];
+}
+
 export interface Status {
-    "id": string | undefined
-    "name": string,
-    "description": string,
-    "escalationSLA": number,
-    "notification": {
-        "deliveryType": string,
-        "pingInterval": number
+    id: string | undefined,
+    name: string,
+    description: string,
+    escalationSLA: number,
+    notification: {
+        deliveryType: string,
+        pingInterval: number
     },
-    "comment": {
-        "text": string,
-        "userIds": number[]
+    comment: {
+        text: string,
+        userIds: number[]
     },
-    "dutyId": number,
+    dutyId: number,
 }
 
 const fireResponseProcess = {
@@ -102,9 +113,9 @@ export const getStatusGraphs = (): Promise<StatusGraph[]> => {
     return new Promise((resolve) => {
         setTimeout(() => {
             resolve([
-                { id: '1', name: 'Реагирование на пожар', nodes: fireResponseProcess.nodes, edges: fireResponseProcess.edges },
-                { id: '2', name: 'Устранение последствий потопа', nodes: [], edges: [] },
-                { id: '3', name: 'Несанкционированное проникновение', nodes: [], edges: []  },
+                { id: '1', name: 'Реагирование на пожар', description: 'Реагирование на пожар', nodes: fireResponseProcess.nodes, edges: fireResponseProcess.edges },
+                { id: '2', name: 'Устранение последствий потопа', description: 'Устранение последствий потопа', nodes: [], edges: [] },
+                { id: '3', name: 'Несанкционированное проникновение', description: 'Несанкционированное проникновение', nodes: [], edges: []  },
             ]);
         }, 1000);
     });
@@ -131,6 +142,19 @@ export const updateStatusGraph = (graph: StatusGraph): Promise<StatusGraph> => {
 
 export const createStatusGraph = (graph: Omit<StatusGraph, 'id'>): Promise<StatusGraph> => {
     return new Promise((resolve) => {
+        // Преобразуем в DTO формат
+        const graphDTO: StatusGraphDTO = {
+            name: graph.name,
+            description: graph.description,
+            vertexes: graph.nodes.map(node => node.id),
+            edges: graph.edges.map(edge => ({
+                from: edge.source,
+                to: edge.target
+            }))
+        };
+        
+        console.log('Создаваемый граф (DTO формат):', graphDTO);
+        
         setTimeout(() => {
             resolve({
                 ...graph,

@@ -17,11 +17,19 @@ interface LoginResponse {
 }
 
 export const login = async (email: string, password: string): Promise<LoginResponse> => {
-    const response = await api.post('/api/v1/auth/token', {
-        email,
-        password
+    // Временно используем моковый токен
+    // const response = await api.post('/api/v1/auth/token', {
+    //     email,
+    //     password
+    // });
+    // return response.data as LoginResponse;
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve({
+                token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjIiLCJuYmYiOjE3NDQ3MzY2NDUsImV4cCI6MTc0NTM0MTQ0NSwiaWF0IjoxNzQ0NzM2NjQ1fQ.3sjpzRxN0HRyniFpvMIoMN-ZaL41s62J4nAwLrMlNNA"
+            });
+        }, 1000);
     });
-    return response.data as LoginResponse;
 };
 
 export const getUsers = (): Promise<User[]> => {

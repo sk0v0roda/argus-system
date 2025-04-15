@@ -1,8 +1,8 @@
 export interface Process {
-    "id": string,
-    "name": string,
-    "description": string,
-    "graphId": string,
+    id: string,
+    name: string,
+    description: string,
+    graphId: string,
 }
 
 export const getProcesses = (): Promise<Process[]> => {

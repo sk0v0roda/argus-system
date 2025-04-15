@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
     ReactFlow,
     Node,
@@ -12,8 +12,8 @@ import {
     Panel,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { Box, Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button as MuiButton } from '@mui/material';
-import { StatusGraph } from '../services/statusService';
+import { Box, Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button as MuiButton, Autocomplete } from '@mui/material';
+import { StatusGraph, Status, getStatuses } from '../services/statusService';
 import Button from './ui/Button';
 
 interface StatusGraphEditorProps {
@@ -26,7 +26,24 @@ const StatusGraphEditor: React.FC<StatusGraphEditorProps> = ({ graph, onSave, is
     const [nodes, setNodes, onNodesChange] = useNodesState(graph.nodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(graph.edges);
     const [isAddNodeDialogOpen, setIsAddNodeDialogOpen] = useState(false);
-    const [newNodeLabel, setNewNodeLabel] = useState('');
+    const [selectedStatus, setSelectedStatus] = useState<Status | null>(null);
+    const [statuses, setStatuses] = useState<Status[]>([]);
+    const [isStatusesLoading, setIsStatusesLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchStatuses = async () => {
+            try {
+                const data = await getStatuses();
+                setStatuses(data);
+            } catch (error) {
+                console.error('Ошибка загрузки статусов:', error);
+            } finally {
+                setIsStatusesLoading(false);
+            }
+        };
+
+        fetchStatuses();
+    }, []);
 
     const onConnect = useCallback(
         (params: Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -42,15 +59,22 @@ const StatusGraphEditor: React.FC<StatusGraphEditorProps> = ({ graph, onSave, is
     };
 
     const handleAddNode = () => {
-        if (newNodeLabel.trim()) {
+        if (selectedStatus) {
+            // Проверяем, существует ли уже узел с таким ID
+            const existingNode = nodes.find(node => node.id === selectedStatus.id);
+            if (existingNode) {
+                console.log('Узел с таким статусом уже существует');
+                return;
+            }
+
             const newNode: Node = {
-                id: `node-${nodes.length + 1}`,
-                data: { label: newNodeLabel },
-                position: { x: 100, y: 100 }, // Начальная позиция нового узла
+                id: selectedStatus.id || `node-${nodes.length + 1}`,
+                data: { label: selectedStatus.name },
+                position: { x: 100, y: 100 },
                 type: 'default'
             };
             setNodes((nds) => [...nds, newNode]);
-            setNewNodeLabel('');
+            setSelectedStatus(null);
             setIsAddNodeDialogOpen(false);
         }
     };
@@ -91,22 +115,45 @@ const StatusGraphEditor: React.FC<StatusGraphEditorProps> = ({ graph, onSave, is
                 </ReactFlow>
             </Box>
 
-            <Dialog open={isAddNodeDialogOpen} onClose={() => setIsAddNodeDialogOpen(false)}>
+            <Dialog 
+                open={isAddNodeDialogOpen} 
+                onClose={() => setIsAddNodeDialogOpen(false)}
+                maxWidth="sm"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        minHeight: '300px',
+                        display: 'flex',
+                        flexDirection: 'column'
+                    }
+                }}
+            >
                 <DialogTitle>Добавить новый узел</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        label="Название узла"
-                        fullWidth
-                        variant="outlined"
-                        value={newNodeLabel}
-                        onChange={(e) => setNewNodeLabel(e.target.value)}
+                <DialogContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Autocomplete
+                        value={selectedStatus}
+                        onChange={(event, newValue) => setSelectedStatus(newValue)}
+                        options={statuses}
+                        getOptionLabel={(option) => option.name}
+                        loading={isStatusesLoading}
+                        loadingText="Загрузка статусов..."
+                        noOptionsText="Статусы не найдены"
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label="Выберите статус"
+                                fullWidth
+                                variant="outlined"
+                                sx={{ mt: 2 }}
+                            />
+                        )}
                     />
                 </DialogContent>
-                <DialogActions>
+                <DialogActions sx={{ p: 2 }}>
                     <MuiButton onClick={() => setIsAddNodeDialogOpen(false)}>Отмена</MuiButton>
-                    <MuiButton onClick={handleAddNode} variant="contained">Добавить</MuiButton>
+                    <MuiButton onClick={handleAddNode} variant="contained" disabled={!selectedStatus}>
+                        Добавить
+                    </MuiButton>
                 </DialogActions>
             </Dialog>
         </>

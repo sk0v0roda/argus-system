@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import Layout from "src/components/Layout";
-import {CircularProgress, Paper, TextField, Button, Box, Autocomplete} from "@mui/material";
+import {CircularProgress, Paper, TextField, Button, Box, Autocomplete, Select, MenuItem, FormControl, InputLabel, SelectChangeEvent} from "@mui/material";
 import {Sensor, getSensorById, updateSensor, createSensor} from "src/services/sensorService";
 import {Process, getProcesses} from "src/services/processService";
 import {formTextFieldStyles, formPaperStyles, formButtonStyles} from "src/styles/formStyles";
@@ -15,6 +15,12 @@ const SensorDetailsPage = () => {
     const [processes, setProcesses] = useState<Process[]>([]);
     const [isProcessesLoading, setIsProcessesLoading] = useState(true);
     const isCreating = !id;
+
+    const priorities = [
+        { value: 'Низкий', label: 'Низкий' },
+        { value: 'Средний', label: 'Средний' },
+        { value: 'Высокий', label: 'Высокий' }
+    ];
 
     useEffect(() => {
         const fetchData = async () => {
@@ -86,6 +92,15 @@ const SensorDetailsPage = () => {
         }
     };
 
+    const handlePriorityChange = (event: SelectChangeEvent<string>) => {
+        if (sensorData) {
+            setSensorData({
+                ...sensorData,
+                ticketPriority: event.target.value
+            });
+        }
+    };
+
     const handleProcessChange = (event: React.SyntheticEvent, newValue: Process | null) => {
         if (sensorData && newValue) {
             setSensorData({
@@ -128,14 +143,21 @@ const SensorDetailsPage = () => {
                                 rows={4}
                                 sx={formTextFieldStyles}
                             />
-                            <TextField
-                                label="Приоритет"
-                                value={sensorData.ticketPriority}
-                                onChange={handleChange('ticketPriority')}
-                                disabled={!isEditing}
-                                fullWidth
-                                sx={formTextFieldStyles}
-                            />
+                            <FormControl fullWidth disabled={!isEditing}>
+                                <InputLabel>Приоритет</InputLabel>
+                                <Select
+                                    value={sensorData.ticketPriority}
+                                    onChange={handlePriorityChange}
+                                    label="Приоритет"
+                                    sx={formTextFieldStyles}
+                                >
+                                    {priorities.map((priority) => (
+                                        <MenuItem key={priority.value} value={priority.value}>
+                                            {priority.label}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
                             <TextField
                                 label="Срок"
                                 type="date"

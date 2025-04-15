@@ -1,21 +1,21 @@
 export interface Duty {
-    "id": number | undefined,
-    "start_time": Date,
-    "interval": {
-        "seconds": number,
-        "zero": boolean,
-        "nano": number,
-        "negative": boolean,
-        "positive": boolean,
-        "units": [
+    id: number | undefined,
+    start_time: Date,
+    interval: {
+        seconds: number,
+        zero: boolean,
+        nano: number,
+        negative: boolean,
+        positive: boolean,
+        units: [
             {
-                "durationEstimated": boolean,
-                "timeBased": boolean,
-                "dateBased": boolean
+                durationEstimated: boolean,
+                timeBased: boolean,
+                dateBased: boolean
             }
         ]
     },
-    "ids": number[]
+    ids: number[]
 }
 
 export const getDuties = (): Promise<Duty[]> => {

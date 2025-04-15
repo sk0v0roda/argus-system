@@ -7,9 +7,9 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-    isAuthenticated: !!localStorage.getItem('token'),
+    isAuthenticated: !!localStorage.getItem('authToken'),
     email: localStorage.getItem('email'),
-    token: localStorage.getItem('token'),
+    token: localStorage.getItem('authToken'),
 };
 
 const authSlice = createSlice({
@@ -20,14 +20,14 @@ const authSlice = createSlice({
             state.isAuthenticated = true;
             state.email = action.payload.email;
             state.token = action.payload.token;
-            localStorage.setItem('token', action.payload.token);
+            localStorage.setItem('authToken', action.payload.token);
             localStorage.setItem('email', action.payload.email);
         },
         logout: (state) => {
             state.isAuthenticated = false;
             state.email = null;
             state.token = null;
-            localStorage.removeItem('token');
+            localStorage.removeItem('authToken');
             localStorage.removeItem('email');
         },
     },

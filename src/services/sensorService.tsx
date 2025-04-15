@@ -1,10 +1,10 @@
 export interface Sensor {
-    "id": string | undefined,
-    "ticketTitle": string,
-    "ticketDescription": string,
-    "ticketPriority": string,
-    "ticketDeadline": Date,
-    "businessProcessId": string
+    id: string | undefined,
+    ticketTitle: string,
+    ticketDescription: string,
+    ticketPriority: string,
+    ticketDeadline: Date,
+    businessProcessId: string
 }
 
 export const getSensors = (): Promise<Sensor[]> => {
