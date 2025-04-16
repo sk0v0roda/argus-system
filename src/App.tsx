@@ -89,6 +89,9 @@ function AppContent() {
                         <Route path="/statuses" element={<StatusPage/>}/>
                         <Route path="/statuses/new" element={<StatusDetailsPage/>}/>
                         <Route path="/statuses/:id" element={<StatusDetailsPage/>}/>
+                        <Route path="/graphs" element={<GraphStatusPage/>}/>
+                        <Route path="/graphs/new" element={<GraphDetailsPage/>}/>
+                        <Route path="/graphs/:id" element={<GraphDetailsPage/>}/>
                         <Route path="/processes" element={<ProcessPage/>}/>
                         <Route path="/processes/new" element={<ProcessCreatePage/>}/>
                         <Route path="/processes/:id" element={<ProcessDetailsPage/>}/>

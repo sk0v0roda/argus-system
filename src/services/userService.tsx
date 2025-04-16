@@ -4,7 +4,10 @@ export interface User {
     id: number;
     name: string;
     email: string;
-    role: string;
+    phone: string;
+    organization: string | null;
+    avatar: string;
+    about: string;
 }
 
 interface LoginRequest {
@@ -38,33 +41,39 @@ export const getUsers = (): Promise<User[]> => {
             resolve([
                 {
                     id: 1,
-                    name: 'Иван Иванов',
-                    email: 'ivan@example.com',
-                    role: 'Администратор'
+                    name: "Иван Иванов",
+                    email: "ivan@example.com",
+                    phone: "+79123456789",
+                    organization: null,
+                    avatar: "https://img.icons8.com/?size=100&id=z-JBA_KtSkxG&format=png&color=000000",
+                    about: "hey I'm using Argus"
                 },
                 {
                     id: 2,
-                    name: 'Петр Петров',
-                    email: 'petr@example.com',
-                    role: 'Оператор'
+                    name: "Степан Пономарев",
+                    email: "stepa@mail.ru",
+                    phone: "+79150041133",
+                    organization: null,
+                    avatar: "https://img.icons8.com/?size=100&id=z-JBA_KtSkxG&format=png&color=000000",
+                    about: "hey I'm using Argus"
                 },
                 {
                     id: 3,
-                    name: 'Сергей Сергеев',
-                    email: 'sergey@example.com',
-                    role: 'Оператор'
+                    name: "Егор Фортов",
+                    email: "egor@mail.ru",
+                    phone: "+79882213123",
+                    organization: null,
+                    avatar: "https://img.icons8.com/?size=100&id=z-JBA_KtSkxG&format=png&color=000000",
+                    about: "hey I'm using Argus"
                 },
                 {
                     id: 4,
-                    name: 'Анна Аннова',
-                    email: 'anna@example.com',
-                    role: 'Менеджер'
-                },
-                {
-                    id: 5,
-                    name: 'Мария Мариева',
-                    email: 'maria@example.com',
-                    role: 'Оператор'
+                    name: "Андрей Шарипов",
+                    email: "andrey@mail.ru",
+                    phone: "+79852682144",
+                    organization: null,
+                    avatar: "https://img.icons8.com/?size=100&id=z-JBA_KtSkxG&format=png&color=000000",
+                    about: "hey I'm using Argus"
                 }
             ]);
         }, 1000);

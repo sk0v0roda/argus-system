@@ -13,11 +13,25 @@ const StatusPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
-        setIsLoading(true);
-        getStatuses().then((data) => {
-            setIsLoading(false);
-            setStatuses(data);
-        });
+        const fetchStatuses = async () => {
+            setIsLoading(true);
+            try {
+                const data = await getStatuses();
+                if (Array.isArray(data)) {
+                    setStatuses(data);
+                } else {
+                    console.error('Полученные данные не являются массивом:', data);
+                    setStatuses([]);
+                }
+            } catch (error) {
+                console.error('Ошибка при загрузке статусов:', error);
+                setStatuses([]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchStatuses();
     }, []);
 
     const formatStatusInfo = (status: Status) => {

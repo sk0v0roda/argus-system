@@ -1,10 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Status, getStatusById, updateStatus, createStatus } from '../services/statusService';
+import { Status, getStatusById, updateStatus, createStatus, NotificationType } from '../services/statusService';
 import { User, getUsers } from '../services/userService';
 import { Duty, getDuties } from '../services/dutyService';
 import Layout from "src/components/Layout";
-import { CircularProgress, Paper, TextField, Button, Box, Autocomplete, Chip } from "@mui/material";
+import { 
+    CircularProgress, 
+    Paper, 
+    TextField, 
+    Button, 
+    Box, 
+    Autocomplete, 
+    Chip, 
+    Select, 
+    MenuItem, 
+    FormControl, 
+    InputLabel, 
+    SelectChangeEvent 
+} from "@mui/material";
 import { formTextFieldStyles, formPaperStyles, formButtonStyles } from "src/styles/formStyles";
 
 const StatusDetailsPage: React.FC = () => {
@@ -30,7 +43,7 @@ const StatusDetailsPage: React.FC = () => {
                         description: '',
                         escalationSLA: 60,
                         notification: {
-                            deliveryType: 'Email',
+                            deliveryType: NotificationType.EMAIL,
                             pingInterval: 15
                         },
                         comment: {
@@ -85,7 +98,9 @@ const StatusDetailsPage: React.FC = () => {
             try {
                 let savedStatus;
                 if (isCreating) {
-                    savedStatus = await createStatus(statusData);
+                    // При создании нового статуса отправляем данные без id
+                    const { id, ...statusWithoutId } = statusData;
+                    savedStatus = await createStatus(statusWithoutId);
                     navigate('/statuses');
                 } else {
                     savedStatus = await updateStatus(statusData);
@@ -93,46 +108,59 @@ const StatusDetailsPage: React.FC = () => {
                 setIsEditing(false);
             } catch (error) {
                 console.error('Ошибка сохранения данных:', error);
+                // Здесь можно добавить уведомление пользователю об ошибке
             }
         }
     };
 
-    const handleChange = (field: keyof Status | 'deliveryType' | 'pingInterval' | 'commentText') => 
+    const handleTextChange = (field: 'name' | 'description' | 'commentText') => 
     (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!statusData) return;
-
-        const value = event.target.value;
-        let updatedData: Status = { ...statusData };
-
-        switch (field) {
-            case 'name':
-            case 'description':
-                updatedData[field] = value;
-                break;
-            case 'escalationSLA':
-                updatedData.escalationSLA = parseInt(value) || 0;
-                break;
-            case 'deliveryType':
-                updatedData.notification = {
-                    ...updatedData.notification,
-                    deliveryType: value
-                };
-                break;
-            case 'pingInterval':
-                updatedData.notification = {
-                    ...updatedData.notification,
-                    pingInterval: parseInt(value) || 0
-                };
-                break;
-            case 'commentText':
-                updatedData.comment = {
-                    ...updatedData.comment,
-                    text: value
-                };
-                break;
+        if (field === 'commentText') {
+            setStatusData({
+                ...statusData,
+                comment: {
+                    ...statusData.comment,
+                    text: event.target.value
+                }
+            });
+        } else {
+            setStatusData({
+                ...statusData,
+                [field]: event.target.value
+            });
         }
+    };
 
-        setStatusData(updatedData);
+    const handleNumberChange = (field: 'escalationSLA' | 'pingInterval') => 
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (!statusData) return;
+        const value = parseInt(event.target.value) || 0;
+        if (field === 'pingInterval') {
+            setStatusData({
+                ...statusData,
+                notification: {
+                    ...statusData.notification,
+                    pingInterval: value
+                }
+            });
+        } else {
+            setStatusData({
+                ...statusData,
+                [field]: value
+            });
+        }
+    };
+
+    const handleDeliveryTypeChange = (event: SelectChangeEvent<NotificationType>) => {
+        if (!statusData) return;
+        setStatusData({
+            ...statusData,
+            notification: {
+                ...statusData.notification,
+                deliveryType: Number(event.target.value) as NotificationType
+            }
+        });
     };
 
     const handleUserChange = (event: React.SyntheticEvent, newValue: User[]) => {
@@ -157,7 +185,10 @@ const StatusDetailsPage: React.FC = () => {
     };
 
     const getSelectedUsers = () => {
-        return users.filter(user => statusData?.comment.userIds.includes(user.id));
+        if (!statusData?.comment?.userIds) {
+            return [];
+        }
+        return users.filter(user => statusData.comment.userIds.includes(user.id));
     };
 
     const getSelectedDuty = () => {
@@ -178,7 +209,7 @@ const StatusDetailsPage: React.FC = () => {
                             <TextField
                                 label="Название"
                                 value={statusData.name}
-                                onChange={handleChange('name')}
+                                onChange={handleTextChange('name')}
                                 disabled={!isEditing}
                                 fullWidth
                                 sx={formTextFieldStyles}
@@ -186,7 +217,7 @@ const StatusDetailsPage: React.FC = () => {
                             <TextField
                                 label="Описание"
                                 value={statusData.description}
-                                onChange={handleChange('description')}
+                                onChange={handleTextChange('description')}
                                 disabled={!isEditing}
                                 fullWidth
                                 multiline
@@ -197,24 +228,29 @@ const StatusDetailsPage: React.FC = () => {
                                 label="SLA эскалации (минуты)"
                                 type="number"
                                 value={statusData.escalationSLA}
-                                onChange={handleChange('escalationSLA')}
+                                onChange={handleNumberChange('escalationSLA')}
                                 disabled={!isEditing}
                                 fullWidth
                                 sx={formTextFieldStyles}
                             />
-                            <TextField
-                                label="Тип уведомления"
-                                value={statusData.notification.deliveryType}
-                                onChange={handleChange('deliveryType')}
-                                disabled={!isEditing}
-                                fullWidth
-                                sx={formTextFieldStyles}
-                            />
+                            <FormControl fullWidth sx={formTextFieldStyles}>
+                                <InputLabel>Тип уведомления</InputLabel>
+                                <Select
+                                    value={statusData.notification.deliveryType}
+                                    onChange={handleDeliveryTypeChange}
+                                    label="Тип уведомления"
+                                    disabled={!isEditing}
+                                >
+                                    <MenuItem value={NotificationType.SMS}>СМС</MenuItem>
+                                    <MenuItem value={NotificationType.CALL}>Звонок</MenuItem>
+                                    <MenuItem value={NotificationType.EMAIL}>Email</MenuItem>
+                                </Select>
+                            </FormControl>
                             <TextField
                                 label="Интервал уведомлений (минуты)"
                                 type="number"
                                 value={statusData.notification.pingInterval}
-                                onChange={handleChange('pingInterval')}
+                                onChange={handleNumberChange('pingInterval')}
                                 disabled={!isEditing}
                                 fullWidth
                                 sx={formTextFieldStyles}
@@ -222,7 +258,7 @@ const StatusDetailsPage: React.FC = () => {
                             <TextField
                                 label="Комментарий"
                                 value={statusData.comment.text}
-                                onChange={handleChange('commentText')}
+                                onChange={handleTextChange('commentText')}
                                 disabled={!isEditing}
                                 fullWidth
                                 multiline

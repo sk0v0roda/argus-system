@@ -19,13 +19,19 @@ export interface StatusGraphDTO {
     }[];
 }
 
+export enum NotificationType {
+    SMS = 0,
+    CALL = 1,
+    EMAIL = 2
+}
+
 export interface Status {
     id: string | undefined,
     name: string,
     description: string,
     escalationSLA: number,
     notification: {
-        deliveryType: string,
+        deliveryType: NotificationType,
         pingInterval: number
     },
     comment: {
@@ -35,114 +41,74 @@ export interface Status {
     dutyId: number,
 }
 
-const fireResponseProcess = {
-    nodes: [
-        {
-            id: '1',
-            type: 'input',
-            data: { label: 'Обнаружение пожара' },
-            position: { x: 250, y: 0 },
-        },
-        {
-            id: '2',
-            data: { label: 'Оповещение сотрудников' },
-            position: { x: 250, y: 100 },
-        },
-        {
-            id: '3',
-            data: { label: 'Эвакуация людей' },
-            position: { x: 250, y: 200 },
-        },
-        {
-            id: '4',
-            data: { label: 'Вызов пожарной службы' },
-            position: { x: 0, y: 200 },
-        },
-        {
-            id: '5',
-            data: { label: 'Тушение пожара (если возможно)' },
-            position: { x: 500, y: 200 },
-        },
-        {
-            id: '6',
-            type: 'output',
-            data: { label: 'Завершение процесса' },
-            position: { x: 250, y: 300 },
-        },
-    ],
-    edges: [
-        {
-            id: 'e1-2',
-            source: '1',
-            target: '2',
-        },
-        {
-            id: 'e2-3',
-            source: '2',
-            target: '3',
-        },
-        {
-            id: 'e2-4',
-            source: '2',
-            target: '4',
-        },
-        {
-            id: 'e2-5',
-            source: '2',
-            target: '5',
-        },
-        {
-            id: 'e3-6',
-            source: '3',
-            target: '6',
-        },
-        {
-            id: 'e4-6',
-            source: '4',
-            target: '6',
-        },
-        {
-            id: 'e5-6',
-            source: '5',
-            target: '6',
-        },
-    ],
-};
-
-export const getStatusGraphs = (): Promise<StatusGraph[]> => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve([
-                { id: '1', name: 'Реагирование на пожар', description: 'Реагирование на пожар', nodes: fireResponseProcess.nodes, edges: fireResponseProcess.edges },
-                { id: '2', name: 'Устранение последствий потопа', description: 'Устранение последствий потопа', nodes: [], edges: [] },
-                { id: '3', name: 'Несанкционированное проникновение', description: 'Несанкционированное проникновение', nodes: [], edges: []  },
-            ]);
-        }, 1000);
-    });
-};
-
-export const getStatusGraphById = (id: string): Promise<StatusGraph> => {
-    return new Promise((resolve) => {
-        setTimeout(async () => {
-            const list = await getStatusGraphs();
-            resolve(
-                list.filter(x => x.id === id)[0]
-            );
-        }, 250);
-    });
+export interface StatusTransition {
+    statusId: string;
+    name: string;
 }
 
-export const updateStatusGraph = (graph: StatusGraph): Promise<StatusGraph> => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve(graph);
-        }, 250);
-    });
+export interface UserInfo {
+    id: number;
+    userName: string;
+    avatar: string;
 }
 
-export const createStatusGraph = (graph: Omit<StatusGraph, 'id'>): Promise<StatusGraph> => {
-    return new Promise((resolve) => {
-        // Преобразуем в DTO формат
+export interface StatusComment {
+    text: string;
+    usersInfo: UserInfo[];
+}
+
+export interface GraphStatus {
+    id: string;
+    name: string;
+    description: string;
+    escalationSLA: number;
+    notification: {
+        deliveryType: NotificationType;
+        pingInterval: number;
+    };
+    comment: StatusComment;
+    orderNum: number;
+    transitions: StatusTransition[];
+    dutyId: number;
+}
+
+export interface StatusGraphResponse {
+    id: string;
+    name: string;
+    description: string;
+    statuses: GraphStatus[];
+}
+
+export const getStatusGraphs = async (graphIds?: string[]): Promise<StatusGraph[]> => {
+    try {
+        const params = graphIds ? { graphIds } : {};
+        const response = await api.get<{ graphs: StatusGraphResponse[] }>('/statuses/api/v1/graphs', { params });
+        if (!response.data.graphs || !Array.isArray(response.data.graphs)) {
+            console.error('Ответ API не содержит массив графов:', response.data);
+            return [];
+        }
+        return response.data.graphs.map(graph => convertToReactFlowFormat(graph));
+    } catch (error) {
+        console.error('Ошибка при получении графов статусов:', error);
+        throw error;
+    }
+};
+
+export const getStatusGraphById = async (id: string): Promise<StatusGraph> => {
+    try {
+        const graphs = await getStatusGraphs([id]);
+        if (graphs.length === 0) {
+            throw new Error('Граф не найден');
+        }
+        return graphs[0];
+    } catch (error) {
+        console.error('Ошибка при получении графа:', error);
+        throw error;
+    }
+};
+
+export const updateStatusGraph = async (graph: StatusGraph): Promise<StatusGraph> => {
+    try {
         const graphDTO: StatusGraphDTO = {
             name: graph.name,
             description: graph.description,
@@ -152,70 +118,37 @@ export const createStatusGraph = (graph: Omit<StatusGraph, 'id'>): Promise<Statu
                 to: edge.target
             }))
         };
-        
-        console.log('Создаваемый граф (DTO формат):', graphDTO);
-        
-        setTimeout(() => {
-            resolve({
-                ...graph,
-                id: Math.random().toString(36).substr(2, 9)
-            });
-        }, 250);
-    });
+
+        const response = await api.put<StatusGraphResponse>(`/statuses/api/v1/graphs/${graph.id}`, graphDTO);
+        return convertToReactFlowFormat(response.data);
+    } catch (error) {
+        console.error('Ошибка при обновлении графа:', error);
+        throw error;
+    }
 };
 
-export const getStatuses = (): Promise<Status[]> => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve([
-                {
-                    id: '1',
-                    name: 'Критический',
-                    description: 'Требует немедленного реагирования',
-                    escalationSLA: 15,
-                    notification: {
-                        deliveryType: 'SMS',
-                        pingInterval: 5
-                    },
-                    comment: {
-                        text: 'Оповестить руководство',
-                        userIds: [1, 2]
-                    },
-                    dutyId: 1
-                },
-                {
-                    id: '2',
-                    name: 'Высокий',
-                    description: 'Требует реагирования в течение часа',
-                    escalationSLA: 60,
-                    notification: {
-                        deliveryType: 'Email',
-                        pingInterval: 15
-                    },
-                    comment: {
-                        text: 'Оповестить дежурную смену',
-                        userIds: [3, 4]
-                    },
-                    dutyId: 2
-                },
-                {
-                    id: '3',
-                    name: 'Средний',
-                    description: 'Требует реагирования в течение дня',
-                    escalationSLA: 480,
-                    notification: {
-                        deliveryType: 'Email',
-                        pingInterval: 60
-                    },
-                    comment: {
-                        text: 'Зафиксировать в системе',
-                        userIds: [5]
-                    },
-                    dutyId: 1
-                }
-            ]);
-        }, 1000);
-    });
+export const createStatusGraph = async (graph: StatusGraphDTO): Promise<StatusGraph> => {
+    try {
+        const response = await api.post<StatusGraphResponse>('/statuses/api/v1/graphs', graph);
+        return convertToReactFlowFormat(response.data);
+    } catch (error) {
+        console.error('Ошибка при создании графа статусов:', error);
+        throw error;
+    }
+};
+
+export const getStatuses = async (): Promise<Status[]> => {
+    try {
+        const response = await api.get<{ statuses: Status[] }>('/statuses/api/v1/statuses');
+        if (!response.data.statuses || !Array.isArray(response.data.statuses)) {
+            console.error('Ответ API не содержит массив статусов:', response.data);
+            return [];
+        }
+        return response.data.statuses;
+    } catch (error) {
+        console.error('Ошибка при получении статусов:', error);
+        throw error;
+    }
 };
 
 export const getStatusById = (id: string): Promise<Status> => {
@@ -229,21 +162,82 @@ export const getStatusById = (id: string): Promise<Status> => {
     });
 }
 
-export const updateStatus = (status: Status): Promise<Status> => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve(status);
-        }, 250);
-    });
-}
+export const updateStatus = async (status: Status): Promise<Status> => {
+    try {
+        const response = await api.put<Status>(`/statuses/api/v1/statuses`, {
+            statusId: status.id,
+            name: status.name,
+            description: status.description,
+            escalationSLA: status.escalationSLA,
+            notification: {
+                deliveryType: status.notification.deliveryType,
+                pingInterval: status.notification.pingInterval
+            },
+            comment: {
+                text: status.comment.text,
+                userIds: status.comment.userIds
+            },
+            dutyId: status.dutyId
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Ошибка при обновлении статуса:', error);
+        throw error;
+    }
+};
 
-export const createStatus = (status: Omit<Status, 'id'>): Promise<Status> => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve({
-                ...status,
-                id: Math.random().toString(36).substr(2, 9)
-            });
-        }, 250);
-    });
+export const createStatus = async (status: Omit<Status, 'id'>): Promise<Status> => {
+    try {
+        const response = await api.post<Status>('/statuses/api/v1/statuses', {
+            name: status.name,
+            description: status.description,
+            escalationSLA: status.escalationSLA,
+            notification: {
+                deliveryType: status.notification.deliveryType,
+                pingInterval: status.notification.pingInterval
+            },
+            comment: {
+                text: status.comment.text,
+                userIds: status.comment.userIds
+            },
+            dutyId: status.dutyId
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Ошибка при создании статуса:', error);
+        throw error;
+    }
+};
+
+export const convertToReactFlowFormat = (graph: StatusGraphResponse): StatusGraph => {
+    const nodes: Node[] = graph.statuses.map(status => ({
+        id: status.id,
+        type: 'default',
+        position: { x: status.orderNum * 200, y: 0 }, // Пока просто располагаем по горизонтали
+        data: { 
+            label: status.name,
+            description: status.description,
+            escalationSLA: status.escalationSLA,
+            notification: status.notification,
+            comment: status.comment,
+            dutyId: status.dutyId
+        }
+    }));
+
+    const edges: Edge[] = graph.statuses.flatMap(status => 
+        status.transitions.map(transition => ({
+            id: `e${status.id}-${transition.statusId}`,
+            source: status.id,
+            target: transition.statusId,
+            label: transition.name
+        }))
+    );
+
+    return {
+        id: graph.id,
+        name: graph.name,
+        description: graph.description,
+        nodes,
+        edges
+    };
 }; 

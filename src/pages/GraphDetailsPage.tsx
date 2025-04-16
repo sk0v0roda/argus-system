@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import Layout from "src/components/Layout";
 import {CircularProgress, Paper, Button, Box, Dialog, DialogTitle, DialogContent, TextField, DialogActions} from "@mui/material";
-import {getStatusGraphById, updateStatusGraph, createStatusGraph, StatusGraph} from "src/services/statusService";
+import {getStatusGraphById, createStatusGraph, StatusGraph, StatusGraphDTO} from "src/services/statusService";
 import StatusGraphEditor from "src/components/StatusGraphEditor";
 import {formPaperStyles, formButtonStyles, formTextFieldStyles} from "src/styles/formStyles";
 
@@ -11,7 +11,6 @@ const GraphDetailsPage = () => {
     const navigate = useNavigate();
     const [graphData, setGraphData] = useState<StatusGraph | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [isEditing, setIsEditing] = useState(false);
     const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
     const [graphToSave, setGraphToSave] = useState<StatusGraph | null>(null);
     const [graphName, setGraphName] = useState('');
@@ -30,13 +29,14 @@ const GraphDetailsPage = () => {
                         nodes: [],
                         edges: []
                     });
-                    setIsEditing(true);
                     setIsLoading(false);
                     return;
                 }
 
                 const data = await getStatusGraphById(id);
                 setGraphData(data);
+                setGraphName(data.name);
+                setGraphDescription(data.description);
             } catch (error) {
                 console.error('Ошибка загрузки данных:', error);
             } finally {
@@ -47,84 +47,85 @@ const GraphDetailsPage = () => {
         fetchData();
     }, [id]);
 
-    const handleGraphSave = async (updatedGraph: StatusGraph) => {
-        if (isCreating) {
-            setGraphToSave(updatedGraph);
-            setGraphName('');
-            setGraphDescription('');
-            setIsSaveDialogOpen(true);
-        } else {
-            try {
-                await updateStatusGraph(updatedGraph);
-                setIsEditing(false);
-            } catch (error) {
-                console.error('Ошибка сохранения данных:', error);
-            }
+    const handleSave = async () => {
+        if (!graphData) return;
+
+        const graphDTO: StatusGraphDTO = {
+            name: graphName,
+            description: graphDescription,
+            vertexes: graphData.nodes.map(node => node.id),
+            edges: graphData.edges.map(edge => ({
+                from: edge.source,
+                to: edge.target
+            }))
+        };
+
+        try {
+            await createStatusGraph(graphDTO);
+            navigate('/graphs');
+        } catch (error) {
+            console.error('Ошибка сохранения данных:', error);
         }
     };
 
-    const handleConfirmSave = async () => {
-        if (!graphToSave || !graphName.trim()) return;
+    const handleGraphChange = (graph: StatusGraph) => {
+        setGraphToSave(graph);
+        setIsSaveDialogOpen(true);
+    };
 
-        try {
-            console.log('Создаваемый граф:', {
-                ...graphToSave,
-                name: graphName,
-                description: graphDescription
-            });
-            await createStatusGraph({
-                ...graphToSave,
-                name: graphName,
-                description: graphDescription
-            });
+    const handleDialogSave = () => {
+        if (graphToSave) {
+            setGraphData(graphToSave);
             setIsSaveDialogOpen(false);
-            navigate('/statusgraphs');
-        } catch (error) {
-            console.error('Ошибка сохранения данных:', error);
+            handleSave();
         }
     };
 
     return (
         <Layout>
             <div className={'page-header'}>
-                <h1>{isCreating ? 'Создание графа статусов' : graphData?.name || 'Граф статусов'}</h1>
+                <h1>{isCreating ? 'Создание графа статусов' : 'Просмотр графа статусов'}</h1>
             </div>
             <div className={'page-content'}>
                 <Paper elevation={3} sx={formPaperStyles}>
                     {isLoading ? (
                         <CircularProgress color="secondary" size={50} thickness={5}/>
                     ) : graphData ? (
-                        <>
-                            <StatusGraphEditor 
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <StatusGraphEditor
                                 graph={graphData}
-                                onSave={handleGraphSave}
-                                isEditing={isEditing || isCreating}
+                                onSave={isCreating ? handleGraphChange : undefined}
+                                isEditing={isCreating}
                             />
                             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
-                                {!isEditing && !isCreating && (
+                                {isCreating ? (
+                                    <>
+                                        <Button 
+                                            variant="outlined" 
+                                            onClick={() => navigate('/graphs')}
+                                            sx={formButtonStyles}
+                                        >
+                                            Отмена
+                                        </Button>
+                                        <Button 
+                                            variant="outlined" 
+                                            onClick={handleSave}
+                                            sx={formButtonStyles}
+                                        >
+                                            Создать
+                                        </Button>
+                                    </>
+                                ) : (
                                     <Button 
                                         variant="outlined" 
-                                        onClick={() => setIsEditing(true)}
+                                        onClick={() => navigate('/graphs')}
                                         sx={formButtonStyles}
                                     >
-                                        Редактировать
+                                        Назад
                                     </Button>
                                 )}
-                                <Button 
-                                    variant="outlined" 
-                                    onClick={() => {
-                                        if (isCreating || isEditing) {
-                                            navigate('/statusgraphs');
-                                        } else {
-                                            setIsEditing(false);
-                                        }
-                                    }}
-                                    sx={formButtonStyles}
-                                >
-                                    {isCreating || isEditing ? 'Отмена' : 'Назад'}
-                                </Button>
                             </Box>
-                        </>
+                        </Box>
                     ) : !isCreating && (
                         <div>Граф не найден</div>
                     )}
@@ -132,46 +133,28 @@ const GraphDetailsPage = () => {
             </div>
 
             <Dialog open={isSaveDialogOpen} onClose={() => setIsSaveDialogOpen(false)}>
-                <DialogTitle>Сохранение графа статусов</DialogTitle>
+                <DialogTitle>Сохранение графа</DialogTitle>
                 <DialogContent>
                     <TextField
-                        autoFocus
-                        margin="dense"
-                        label="Название графа"
-                        fullWidth
-                        variant="outlined"
+                        label="Название"
                         value={graphName}
                         onChange={(e) => setGraphName(e.target.value)}
-                        sx={formTextFieldStyles}
+                        fullWidth
+                        sx={{ mt: 2 }}
                     />
                     <TextField
-                        margin="dense"
-                        label="Описание графа"
-                        fullWidth
-                        variant="outlined"
-                        multiline
-                        rows={4}
+                        label="Описание"
                         value={graphDescription}
                         onChange={(e) => setGraphDescription(e.target.value)}
-                        sx={formTextFieldStyles}
+                        fullWidth
+                        multiline
+                        rows={4}
+                        sx={{ mt: 2 }}
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button 
-                        variant="outlined" 
-                        onClick={() => setIsSaveDialogOpen(false)}
-                        sx={formButtonStyles}
-                    >
-                        Отмена
-                    </Button>
-                    <Button 
-                        variant="outlined" 
-                        onClick={handleConfirmSave}
-                        disabled={!graphName.trim()}
-                        sx={formButtonStyles}
-                    >
-                        Сохранить
-                    </Button>
+                    <Button onClick={() => setIsSaveDialogOpen(false)}>Отмена</Button>
+                    <Button onClick={handleDialogSave} disabled={!graphName.trim()}>Создать</Button>
                 </DialogActions>
             </Dialog>
         </Layout>

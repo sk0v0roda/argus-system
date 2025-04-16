@@ -18,11 +18,11 @@ import Button from './ui/Button';
 
 interface StatusGraphEditorProps {
     graph: StatusGraph;
-    onSave: (graph: StatusGraph) => void;
-    isEditing?: boolean;
+    onSave?: (graph: StatusGraph) => void;
+    isEditing: boolean;
 }
 
-const StatusGraphEditor: React.FC<StatusGraphEditorProps> = ({ graph, onSave, isEditing = true }) => {
+const StatusGraphEditor: React.FC<StatusGraphEditorProps> = ({ graph, onSave, isEditing }) => {
     const [nodes, setNodes, onNodesChange] = useNodesState(graph.nodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(graph.edges);
     const [isAddNodeDialogOpen, setIsAddNodeDialogOpen] = useState(false);
@@ -51,7 +51,7 @@ const StatusGraphEditor: React.FC<StatusGraphEditorProps> = ({ graph, onSave, is
     );
 
     const handleSave = () => {
-        onSave({
+        onSave && onSave({
             ...graph,
             nodes,
             edges,
@@ -87,13 +87,13 @@ const StatusGraphEditor: React.FC<StatusGraphEditorProps> = ({ graph, onSave, is
                     edges={edges}
                     onNodesChange={onNodesChange}
                     onEdgesChange={onEdgesChange}
-                    onConnect={onConnect}
+                    onConnect={isEditing ? onConnect : undefined}
                     fitView
                     defaultEdgeOptions={{ 
                         animated: true,
                         style: { stroke: '#666', strokeWidth: 2 }
                     }}
-                    nodesDraggable={isEditing}
+                    nodesDraggable={true}
                     nodesConnectable={isEditing}
                     elementsSelectable={isEditing}
                     minZoom={0.1}
