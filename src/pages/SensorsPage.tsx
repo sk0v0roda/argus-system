@@ -27,6 +27,20 @@ const SensorsPage = () => {
     const filteredItems = sensors.filter((item) =>
         item.ticketTitle.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    const getPriorityLabel = (priority: number) => {
+        switch (priority) {
+            case 0:
+                return 'Низкий';
+            case 1:
+                return 'Средний';
+            case 2:
+                return 'Высокий';
+            default:
+                return 'Неизвестно';
+        }
+    };
+
     return (
         <Layout>
             <div className={'page-header'}>
@@ -50,14 +64,17 @@ const SensorsPage = () => {
 
                     <List>
                         {isLoading && <CircularProgress color="secondary" size={50} thickness={5} />}
-                        {filteredItems.map((item, index) => (
+                        {filteredItems.map((item) => (
                             <ListItem
-                                key={index}
+                                key={item.id}
                                 className={'list-item'}
                                 onClick={() => navigate(`/sensors/${item.id}`)}
                                 sx={listItemStyles}
                             >
-                                <ListItemText primary={item.ticketTitle} />
+                                <ListItemText 
+                                    primary={item.ticketTitle}
+                                    secondary={`Приоритет: ${getPriorityLabel(item.priority)} | Срок решения: ${item.resolveDaysCount} дней`}
+                                />
                             </ListItem>
                         ))}
                     </List>

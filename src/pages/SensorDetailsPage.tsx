@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import Layout from "src/components/Layout";
 import {CircularProgress, Paper, TextField, Button, Box, Autocomplete, Select, MenuItem, FormControl, InputLabel, SelectChangeEvent} from "@mui/material";
-import {Sensor, getSensorById, updateSensor, createSensor} from "src/services/sensorService";
+import {Sensor, getSensors, updateSensor, createSensor} from "src/services/sensorService";
 import {Process, getProcesses} from "src/services/processService";
 import {formTextFieldStyles, formPaperStyles, formButtonStyles} from "src/styles/formStyles";
 
@@ -17,9 +17,9 @@ const SensorDetailsPage = () => {
     const isCreating = !id;
 
     const priorities = [
-        { value: 'Низкий', label: 'Низкий' },
-        { value: 'Средний', label: 'Средний' },
-        { value: 'Высокий', label: 'Высокий' }
+        { value: 0, label: 'Низкий' },
+        { value: 1, label: 'Средний' },
+        { value: 2, label: 'Высокий' }
     ];
 
     useEffect(() => {
@@ -31,17 +31,26 @@ const SensorDetailsPage = () => {
                         id: undefined,
                         ticketTitle: '',
                         ticketDescription: '',
-                        ticketPriority: 'Средний',
-                        ticketDeadline: new Date(),
-                        businessProcessId: ''
+                        priority: 1,
+                        resolveDaysCount: 7,
+                        processId: ''
                     });
                     setIsEditing(true);
                     setIsLoading(false);
                     return;
                 }
 
-                const data = await getSensorById(id);
-                setSensorData(data);
+                // Получаем список датчиков и находим нужный
+                const sensors = await getSensors();
+                const sensor = sensors.find(s => s.id === id);
+                
+                if (!sensor) {
+                    console.error('Датчик не найден');
+                    navigate('/sensors');
+                    return;
+                }
+
+                setSensorData(sensor);
             } catch (error) {
                 console.error('Ошибка загрузки данных:', error);
             } finally {
@@ -62,7 +71,7 @@ const SensorDetailsPage = () => {
 
         fetchData();
         fetchProcesses();
-    }, [id]);
+    }, [id, navigate]);
 
     const handleSave = async () => {
         if (sensorData) {
@@ -85,18 +94,16 @@ const SensorDetailsPage = () => {
         if (sensorData) {
             setSensorData({
                 ...sensorData,
-                [field]: field === 'ticketDeadline' ? 
-                    (event.target.value ? new Date(event.target.value) : new Date()) 
-                    : event.target.value
+                [field]: event.target.value
             });
         }
     };
 
-    const handlePriorityChange = (event: SelectChangeEvent<string>) => {
+    const handlePriorityChange = (event: SelectChangeEvent<number>) => {
         if (sensorData) {
             setSensorData({
                 ...sensorData,
-                ticketPriority: event.target.value
+                priority: Number(event.target.value)
             });
         }
     };
@@ -105,13 +112,13 @@ const SensorDetailsPage = () => {
         if (sensorData && newValue) {
             setSensorData({
                 ...sensorData,
-                businessProcessId: newValue.id
+                processId: newValue.id
             });
         }
     };
 
     const getSelectedProcess = () => {
-        return processes.find(p => p.id === sensorData?.businessProcessId) || null;
+        return processes.find(p => p.id === sensorData?.processId) || null;
     };
 
     return (
@@ -146,7 +153,7 @@ const SensorDetailsPage = () => {
                             <FormControl fullWidth disabled={!isEditing}>
                                 <InputLabel>Приоритет</InputLabel>
                                 <Select
-                                    value={sensorData.ticketPriority}
+                                    value={sensorData.priority}
                                     onChange={handlePriorityChange}
                                     label="Приоритет"
                                     sx={formTextFieldStyles}
@@ -159,10 +166,10 @@ const SensorDetailsPage = () => {
                                 </Select>
                             </FormControl>
                             <TextField
-                                label="Срок"
-                                type="date"
-                                value={sensorData.ticketDeadline.toISOString().split('T')[0]}
-                                onChange={handleChange('ticketDeadline')}
+                                label="Срок решения (дней)"
+                                type="number"
+                                value={sensorData.resolveDaysCount}
+                                onChange={handleChange('resolveDaysCount')}
                                 disabled={!isEditing}
                                 fullWidth
                                 InputLabelProps={{
