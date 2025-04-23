@@ -21,8 +21,7 @@ export interface StatusGraphDTO {
 
 export enum NotificationType {
     SMS = 0,
-    CALL = 1,
-    EMAIL = 2
+    EMAIL = 1
 }
 
 export interface Status {

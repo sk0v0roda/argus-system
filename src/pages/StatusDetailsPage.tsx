@@ -242,7 +242,6 @@ const StatusDetailsPage: React.FC = () => {
                                     disabled={!isEditing}
                                 >
                                     <MenuItem value={NotificationType.SMS}>СМС</MenuItem>
-                                    <MenuItem value={NotificationType.CALL}>Звонок</MenuItem>
                                     <MenuItem value={NotificationType.EMAIL}>Email</MenuItem>
                                 </Select>
                             </FormControl>

@@ -36,6 +36,6 @@ api.interceptors.response.use(
     }
 );
 
-export const getApiUrl = (controller: string, service: string): string => {
-    return `${controller}/api/v1/${service}`;
+export const getApiUrl = (path: string): string => {
+    return `${API_BASE_URL}/${path}`;
 }; 
