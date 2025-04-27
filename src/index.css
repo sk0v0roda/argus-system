@@ -449,3 +449,7 @@ input.error, input.error:focus {
     background-color: #cccccc;
     cursor: not-allowed;
 }
+
+.css-xu2j2a-MuiDialogContent-root {
+    padding-top: 8px !important;
+}

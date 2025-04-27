@@ -2,11 +2,21 @@ import axios from 'axios';
 import { store } from '../store/store';
 
 const API_BASE_URL = 'http://158.160.133.19:5000/proxy';
+const AUTH_BASE_URL = 'http://158.160.133.19:5000';
 
 export const api = axios.create({
     baseURL: API_BASE_URL,
     headers: {
         'Content-Type': 'application/json',
+        'Accept': '*/*'
+    },
+});
+
+export const authApi = axios.create({
+    baseURL: AUTH_BASE_URL,
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': '*/*'
     },
 });
 

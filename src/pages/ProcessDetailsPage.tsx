@@ -1,11 +1,12 @@
 import {useEffect, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import Layout from "src/components/Layout";
-import {CircularProgress, Paper, Typography, Drawer, Box, Avatar, Chip, List, ListItem, ListItemText, ListItemAvatar, Divider, TextField, Button} from "@mui/material";
+import {CircularProgress, Paper, Typography, Drawer, Box, Avatar, Chip, List, ListItem, ListItemText, ListItemAvatar, Divider, TextField, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Button as MuiButton} from "@mui/material";
 import {getProcessById, ProcessDetails, ProcessStatus, ProcessTicket, moveTicket, postComment, getTicketById, TicketDetails, TicketComment} from "src/services/processService";
 import {DragDropContext, Droppable, Draggable, DropResult, DroppableProvided, DraggableProvided} from '@hello-pangea/dnd';
 import {formPaperStyles} from "src/styles/formStyles";
-
+import {createTicket} from 'src/services/ticketService';
+import Button from 'src/components/ui/Button';
 const ProcessDetailsPage = () => {
     const {id} = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -15,6 +16,14 @@ const ProcessDetailsPage = () => {
     const [selectedTicket, setSelectedTicket] = useState<TicketDetails | null>(null);
     const [newComment, setNewComment] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isCreateTicketOpen, setIsCreateTicketOpen] = useState(false);
+    const [ticketForm, setTicketForm] = useState({
+        name: '',
+        description: '',
+        priority: 0,
+        deadline: '',
+    });
+    const [isTicketSubmitting, setIsTicketSubmitting] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -152,6 +161,44 @@ const ProcessDetailsPage = () => {
         }
     };
 
+    const handleOpenCreateTicket = () => setIsCreateTicketOpen(true);
+    const handleCloseCreateTicket = () => setIsCreateTicketOpen(false);
+
+    const handleTicketFormChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setTicketForm(prev => ({ ...prev, [field]: e.target.value }));
+    };
+    const handleTicketPriorityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setTicketForm(prev => ({ ...prev, priority: Number(e.target.value) }));
+    };
+
+    const handleCreateTicket = async () => {
+        if (!process) return;
+        setIsTicketSubmitting(true);
+        try {
+            const newTicket = await createTicket({
+                name: ticketForm.name,
+                description: ticketForm.description,
+                processId: process.id,
+                priority: ticketForm.priority,
+                deadline: new Date(ticketForm.deadline).toISOString(),
+                // остальные поля не обязательны для создания
+            } as any);
+
+            // Обновляем данные процесса
+            const updatedProcessData = await getProcessById(process.id);
+            setProcess(updatedProcessData);
+
+            // Закрываем модальное окно и очищаем форму
+            setIsCreateTicketOpen(false);
+            setTicketForm({ name: '', description: '', priority: 0, deadline: '' });
+        } catch (error) {
+            console.error('Ошибка при создании тикета:', error);
+            // TODO: Добавить уведомление пользователю об ошибке
+        } finally {
+            setIsTicketSubmitting(false);
+        }
+    };
+
     if (isLoading) {
         return (
             <Layout>
@@ -164,6 +211,9 @@ const ProcessDetailsPage = () => {
         <Layout>
             <div className={'page-header'}>
                 <h1>{process?.name || 'Процесс'}</h1>
+            </div>
+            <div className={'page-toolbar'}>
+                <Button onClick={handleOpenCreateTicket}>Создать тикет</Button>
             </div>
             <div className={'page-content'}>
                 <Paper elevation={3} sx={formPaperStyles}>
@@ -273,6 +323,52 @@ const ProcessDetailsPage = () => {
                 </Paper>
             </div>
 
+            {/* Модальное окно создания тикета */}
+            <Dialog open={isCreateTicketOpen} onClose={handleCloseCreateTicket}>
+                <DialogTitle>Создать тикет</DialogTitle>
+                <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 350, pt: 2 }}>
+                    <TextField
+                        label="Название"
+                        value={ticketForm.name}
+                        onChange={handleTicketFormChange('name')}
+                        fullWidth
+                    />
+                    <TextField
+                        label="Описание"
+                        value={ticketForm.description}
+                        onChange={handleTicketFormChange('description')}
+                        fullWidth
+                        multiline
+                        rows={3}
+                    />
+                    <TextField
+                        select
+                        label="Приоритет"
+                        value={ticketForm.priority}
+                        onChange={handleTicketPriorityChange}
+                        fullWidth
+                    >
+                        <MenuItem value={0}>Низкий</MenuItem>
+                        <MenuItem value={1}>Средний</MenuItem>
+                        <MenuItem value={2}>Высокий</MenuItem>
+                    </TextField>
+                    <TextField
+                        label="Дедлайн"
+                        type="datetime-local"
+                        value={ticketForm.deadline}
+                        onChange={handleTicketFormChange('deadline')}
+                        fullWidth
+                        InputLabelProps={{ shrink: true }}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <MuiButton onClick={handleCloseCreateTicket}>Отмена</MuiButton>
+                    <MuiButton onClick={handleCreateTicket} disabled={isTicketSubmitting || !ticketForm.name || !ticketForm.deadline} variant="contained">
+                        {isTicketSubmitting ? 'Создание...' : 'Создать'}
+                    </MuiButton>
+                </DialogActions>
+            </Dialog>
+
             <Drawer
                 anchor="bottom"
                 open={!!selectedTicket}
@@ -365,13 +461,13 @@ const ProcessDetailsPage = () => {
                                 rows={2}
                                 disabled={isSubmitting}
                             />
-                            <Button 
+                            <MuiButton 
                                 variant="contained" 
                                 onClick={handleCommentSubmit}
                                 disabled={!newComment.trim() || isSubmitting}
                             >
                                 {isSubmitting ? 'Отправка...' : 'Отправить'}
-                            </Button>
+                            </MuiButton>
                         </Box>
                     </Box>
                 )}

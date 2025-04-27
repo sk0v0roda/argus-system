@@ -66,7 +66,7 @@ function AppContent() {
                                         <div className={'profile-picture'}></div>
                                     </div>
                                     <div className={'username'}>
-                                        {email || 'Гость'}
+                                        {email ? email.split('@')[0] : 'Гость'}
                                     </div>
                                     <button onClick={handleLogout}>
                                         <div className={'logout-button'}>Выйти</div>

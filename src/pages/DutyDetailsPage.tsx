@@ -23,7 +23,8 @@ const DutyDetailsPage: React.FC = () => {
                     // Создание нового дежурства
                     setDutyData({
                         id: undefined,
-                        start_time: new Date(),
+                        start_time: new Date().toISOString(),
+                        name: '',
                         interval: {
                             seconds: 28800, // 8 часов по умолчанию
                             zero: false,
@@ -86,7 +87,7 @@ const DutyDetailsPage: React.FC = () => {
         }
     };
 
-    const handleChange = (field: keyof Duty | 'duration') => 
+    const handleChange = (field: keyof Duty | 'duration' | 'employeeIds') => 
     (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!dutyData) return;
 
@@ -95,7 +96,7 @@ const DutyDetailsPage: React.FC = () => {
 
         switch (field) {
             case 'start_time':
-                updatedData.start_time = value ? new Date(value) : new Date();
+                updatedData.start_time = value ? new Date(value).toISOString() : new Date().toISOString();
                 break;
             case 'duration':
                 const hours = parseFloat(value) || 0;
@@ -103,6 +104,12 @@ const DutyDetailsPage: React.FC = () => {
                     ...updatedData.interval,
                     seconds: hours * 3600
                 };
+                break;
+            case 'employeeIds':
+                updatedData.ids = value.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+                break;
+            case 'name':
+                updatedData.name = value;
                 break;
         }
 

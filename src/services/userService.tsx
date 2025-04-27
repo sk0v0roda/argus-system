@@ -1,4 +1,4 @@
-import { api } from './api';
+import { api, authApi } from './api';
 
 export interface User {
     id: number;
@@ -20,19 +20,11 @@ interface LoginResponse {
 }
 
 export const login = async (email: string, password: string): Promise<LoginResponse> => {
-    // Временно используем моковый токен
-    // const response = await api.post('/api/v1/auth/token', {
-    //     email,
-    //     password
-    // });
-    // return response.data as LoginResponse;
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve({
-                token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjIiLCJuYmYiOjE3NDU0MTc2NzAsImV4cCI6MTc0NjAyMjQ3MCwiaWF0IjoxNzQ1NDE3NjcwfQ.KQ5XgcyZvcK8CKqKC33H5DCX8setGWgBA_Dwlzc3H_U"
-            });
-        }, 1000);
+    const response = await authApi.post('/api/v1/auth/token', {
+        email,
+        password
     });
+    return response.data as LoginResponse;
 };
 
 export const getUsers = async (): Promise<User[]> => {

@@ -123,11 +123,7 @@ export const createProcess = async (process: Omit<Process, 'id'>): Promise<Proce
 
 export const moveTicket = async (ticketId: string, newStatusId: string): Promise<void> => {
     try {
-        await api.post(`/processes/api/v1/tickets/${ticketId}/move`, {}, {
-            params: {
-                newStatusId
-            }
-        });
+        await api.post(`/processes/api/v1/tickets/${ticketId}/move`, {newStatusId: newStatusId});
     } catch (error) {
         console.error('Ошибка при перемещении тикета:', error);
         throw error;
