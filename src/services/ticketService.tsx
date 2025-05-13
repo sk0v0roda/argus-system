@@ -91,7 +91,7 @@ export const createTicket = async (ticket: Omit<Ticket, 'id'>): Promise<Ticket> 
 export const postComment = async (ticketId: string, commentText: string): Promise<Comment> => {
     try {
         const response = await api.post<Comment>(`/processes/api/v1/tickets/${ticketId}/comments`, {
-            text: commentText,
+                text: commentText,
             mentionedUserIds: []
         });
         return response.data;

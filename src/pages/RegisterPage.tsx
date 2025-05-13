@@ -3,13 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { RootState } from '../store/store';
 import { setTheme } from '../store/slices/themeSlice';
+import { register, login } from '../services/userService';
+import { login as loginAction } from '../store/slices/authSlice';
 
-interface RegisterPageProps {
-    onRegister: (username: string, password: string, confirmPassword: string) => void;
-}
-
-const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister }) => {
-    const [username, setUsername] = useState('');
+const RegisterPage: React.FC = () => {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
@@ -17,11 +17,11 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister }) => {
     const navigate = useNavigate();
     const isDarkTheme = useSelector((state: RootState) => state.theme.isDarkTheme);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
 
-        if (!username || !password || !confirmPassword) {
+        if (!name || !email || !phone || !password || !confirmPassword) {
             setError('Пожалуйста, заполните все поля');
             return;
         }
@@ -32,10 +32,19 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister }) => {
         }
 
         try {
-            onRegister(username, password, confirmPassword);
+            await register({
+                name,
+                email,
+                phone,
+                password
+            });
+            
+            // Автоматический вход после регистрации
+            const loginResponse = await login(email, password);
+            dispatch(loginAction({ email, token: loginResponse.token }));
             navigate('/');
         } catch (err) {
-            setError('Ошибка регистрации. Попробуйте другой логин.');
+            setError('Ошибка регистрации. Попробуйте другой email.');
         }
     };
 
@@ -47,9 +56,25 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegister }) => {
                 <div className="input-group">
                     <input
                         type="text"
-                        placeholder="Логин"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="Имя"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                    />
+                </div>
+                <div className="input-group">
+                    <input
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                </div>
+                <div className="input-group">
+                    <input
+                        type="tel"
+                        placeholder="Телефон"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
                     />
                 </div>
                 <div className="input-group">

@@ -52,7 +52,7 @@ function AppContent() {
         <Container fluid className="p-0">
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage onRegister={handleRegister} />} />
+                <Route path="/register" element={<RegisterPage />} />
 
                 <Route element={<ProtectedRoute />}>
                     <Route element={

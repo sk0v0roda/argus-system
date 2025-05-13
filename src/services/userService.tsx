@@ -76,4 +76,21 @@ export const getUserById = async (id: number): Promise<User> => {
         console.error('Ошибка при получении пользователя:', error);
         throw error;
     }
+};
+
+interface RegisterRequest {
+    name: string;
+    email: string;
+    phone: string;
+    password: string;
+}
+
+export const register = async (userData: RegisterRequest): Promise<User> => {
+    try {
+        const response = await api.post<User>('/profiles/users', userData);
+        return response.data;
+    } catch (error) {
+        console.error('Ошибка при регистрации пользователя:', error);
+        throw error;
+    }
 }; 

@@ -16,7 +16,8 @@ import {
     MenuItem, 
     FormControl, 
     InputLabel, 
-    SelectChangeEvent 
+    SelectChangeEvent,
+    FormHelperText
 } from "@mui/material";
 import { formTextFieldStyles, formPaperStyles, formButtonStyles } from "src/styles/formStyles";
 
@@ -31,6 +32,16 @@ const StatusDetailsPage: React.FC = () => {
     const [isUsersLoading, setIsUsersLoading] = useState(true);
     const [isDutiesLoading, setIsDutiesLoading] = useState(true);
     const isCreating = !id;
+
+    const [errors, setErrors] = useState<{
+        name?: string;
+        description?: string;
+        escalationSLA?: string;
+        pingInterval?: string;
+        commentText?: string;
+        users?: string;
+        duty?: string;
+    }>({});
 
     useEffect(() => {
         const fetchData = async () => {
@@ -93,12 +104,42 @@ const StatusDetailsPage: React.FC = () => {
         fetchDuties();
     }, [id]);
 
+    const validateForm = (): boolean => {
+        const newErrors: typeof errors = {};
+
+        if (!statusData?.name?.trim()) {
+            newErrors.name = 'Название обязательно';
+        }
+
+        if (!statusData?.description?.trim()) {
+            newErrors.description = 'Описание обязательно';
+        }
+
+        if (!statusData?.escalationSLA || statusData.escalationSLA < 1) {
+            newErrors.escalationSLA = 'SLA эскалации должен быть больше 0';
+        }
+
+        if (!statusData?.notification.pingInterval || statusData.notification.pingInterval < 1) {
+            newErrors.pingInterval = 'Интервал уведомлений должен быть больше 0';
+        }
+
+        if (!statusData?.comment.userIds?.length) {
+            newErrors.users = 'Выберите хотя бы одного пользователя';
+        }
+
+        if (!statusData?.dutyId) {
+            newErrors.duty = 'Выберите дежурство';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSave = async () => {
-        if (statusData) {
+        if (statusData && validateForm()) {
             try {
                 let savedStatus;
                 if (isCreating) {
-                    // При создании нового статуса отправляем данные без id
                     const { id, ...statusWithoutId } = statusData;
                     savedStatus = await createStatus(statusWithoutId);
                     navigate('/statuses');
@@ -108,7 +149,6 @@ const StatusDetailsPage: React.FC = () => {
                 setIsEditing(false);
             } catch (error) {
                 console.error('Ошибка сохранения данных:', error);
-                // Здесь можно добавить уведомление пользователю об ошибке
             }
         }
     };
@@ -212,6 +252,8 @@ const StatusDetailsPage: React.FC = () => {
                                 onChange={handleTextChange('name')}
                                 disabled={!isEditing}
                                 fullWidth
+                                error={!!errors.name}
+                                helperText={errors.name}
                                 sx={formTextFieldStyles}
                             />
                             <TextField
@@ -222,6 +264,8 @@ const StatusDetailsPage: React.FC = () => {
                                 fullWidth
                                 multiline
                                 rows={4}
+                                error={!!errors.description}
+                                helperText={errors.description}
                                 sx={formTextFieldStyles}
                             />
                             <TextField
@@ -231,6 +275,9 @@ const StatusDetailsPage: React.FC = () => {
                                 onChange={handleNumberChange('escalationSLA')}
                                 disabled={!isEditing}
                                 fullWidth
+                                error={!!errors.escalationSLA}
+                                helperText={errors.escalationSLA}
+                                inputProps={{ min: 1 }}
                                 sx={formTextFieldStyles}
                             />
                             <FormControl fullWidth sx={formTextFieldStyles}>
@@ -252,6 +299,9 @@ const StatusDetailsPage: React.FC = () => {
                                 onChange={handleNumberChange('pingInterval')}
                                 disabled={!isEditing}
                                 fullWidth
+                                error={!!errors.pingInterval}
+                                helperText={errors.pingInterval}
+                                inputProps={{ min: 1 }}
                                 sx={formTextFieldStyles}
                             />
                             <TextField
@@ -262,6 +312,8 @@ const StatusDetailsPage: React.FC = () => {
                                 fullWidth
                                 multiline
                                 rows={2}
+                                error={!!errors.commentText}
+                                helperText={errors.commentText}
                                 sx={formTextFieldStyles}
                             />
                             <Autocomplete
@@ -275,6 +327,8 @@ const StatusDetailsPage: React.FC = () => {
                                         {...params}
                                         label="Пользователи"
                                         disabled={!isEditing || isUsersLoading}
+                                        error={!!errors.users}
+                                        helperText={errors.users}
                                         sx={formTextFieldStyles}
                                     />
                                 )}
@@ -301,6 +355,8 @@ const StatusDetailsPage: React.FC = () => {
                                         {...params}
                                         label="Дежурство"
                                         disabled={!isEditing || isDutiesLoading}
+                                        error={!!errors.duty}
+                                        helperText={errors.duty}
                                         sx={formTextFieldStyles}
                                     />
                                 )}

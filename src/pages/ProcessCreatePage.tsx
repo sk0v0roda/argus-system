@@ -16,6 +16,11 @@ const ProcessCreatePage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [statusGraphs, setStatusGraphs] = useState<StatusGraph[]>([]);
     const [isGraphsLoading, setIsGraphsLoading] = useState(true);
+    const [errors, setErrors] = useState<{
+        name?: string;
+        description?: string;
+        graphId?: string;
+    }>({});
 
     useEffect(() => {
         const fetchGraphs = async () => {
@@ -57,16 +62,37 @@ const ProcessCreatePage: React.FC = () => {
         return statusGraphs.find(graph => graph.id === processData.graphId) || null;
     };
 
+    const validateForm = (): boolean => {
+        const newErrors: typeof errors = {};
+
+        if (!processData.name.trim()) {
+            newErrors.name = 'Название обязательно';
+        }
+
+        if (!processData.description.trim()) {
+            newErrors.description = 'Описание обязательно';
+        }
+
+        if (!processData.graphId) {
+            newErrors.graphId = 'Выберите граф статусов';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSave = async () => {
-        try {
-            setIsLoading(true);
-            console.log('Создаваемый процесс:', processData);
-            await createProcess(processData);
-            navigate('/processes');
-        } catch (error) {
-            console.error('Ошибка при создании процесса:', error);
-        } finally {
-            setIsLoading(false);
+        if (validateForm()) {
+            try {
+                setIsLoading(true);
+                console.log('Создаваемый процесс:', processData);
+                await createProcess(processData);
+                navigate('/processes');
+            } catch (error) {
+                console.error('Ошибка при создании процесса:', error);
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -83,6 +109,8 @@ const ProcessCreatePage: React.FC = () => {
                             value={processData.name}
                             onChange={handleTextChange('name')}
                             fullWidth
+                            error={!!errors.name}
+                            helperText={errors.name}
                             sx={formTextFieldStyles}
                         />
                         <TextField
@@ -92,6 +120,8 @@ const ProcessCreatePage: React.FC = () => {
                             fullWidth
                             multiline
                             rows={4}
+                            error={!!errors.description}
+                            helperText={errors.description}
                             sx={formTextFieldStyles}
                         />
                         <Autocomplete
@@ -104,6 +134,8 @@ const ProcessCreatePage: React.FC = () => {
                                     {...params}
                                     label="Граф статусов"
                                     disabled={isGraphsLoading}
+                                    error={!!errors.graphId}
+                                    helperText={errors.graphId}
                                     sx={formTextFieldStyles}
                                 />
                             )}

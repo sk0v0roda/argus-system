@@ -15,6 +15,12 @@ const DutyDetailsPage: React.FC = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [isUsersLoading, setIsUsersLoading] = useState(true);
     const isCreating = !id;
+    const [errors, setErrors] = useState<{
+        name?: string;
+        start_time?: string;
+        duration?: string;
+        employeeIds?: string;
+    }>({});
 
     useEffect(() => {
         const fetchData = async () => {
@@ -70,8 +76,36 @@ const DutyDetailsPage: React.FC = () => {
         fetchUsers();
     }, [id]);
 
+    const validateForm = (): boolean => {
+        const newErrors: typeof errors = {};
+
+        if (!dutyData?.name?.trim()) {
+            newErrors.name = 'Название обязательно';
+        }
+
+        if (!dutyData?.start_time) {
+            newErrors.start_time = 'Время начала обязательно';
+        } else {
+            const startTime = new Date(dutyData.start_time);
+            if (isNaN(startTime.getTime())) {
+                newErrors.start_time = 'Некорректное время начала';
+            }
+        }
+
+        if (!dutyData?.interval?.seconds || dutyData.interval.seconds < 3600) {
+            newErrors.duration = 'Длительность должна быть не менее 1 часа';
+        }
+
+        if (!dutyData?.ids?.length) {
+            newErrors.employeeIds = 'Выберите хотя бы одного сотрудника';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSave = async () => {
-        if (dutyData) {
+        if (dutyData && validateForm()) {
             try {
                 let savedDuty;
                 if (isCreating) {
@@ -141,12 +175,24 @@ const DutyDetailsPage: React.FC = () => {
                     ) : dutyData ? (
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                             <TextField
+                                label="Название"
+                                value={dutyData.name}
+                                onChange={handleChange('name')}
+                                disabled={!isEditing}
+                                fullWidth
+                                error={!!errors.name}
+                                helperText={errors.name}
+                                sx={formTextFieldStyles}
+                            />
+                            <TextField
                                 label="Время начала"
                                 type="datetime-local"
                                 value={new Date(dutyData.start_time).toISOString().slice(0, 16)}
                                 onChange={handleChange('start_time')}
                                 disabled={!isEditing}
                                 fullWidth
+                                error={!!errors.start_time}
+                                helperText={errors.start_time}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
@@ -159,6 +205,8 @@ const DutyDetailsPage: React.FC = () => {
                                 onChange={handleChange('duration')}
                                 disabled={!isEditing}
                                 fullWidth
+                                error={!!errors.duration}
+                                helperText={errors.duration}
                                 inputProps={{
                                     min: 1,
                                     max: 24,
@@ -177,6 +225,8 @@ const DutyDetailsPage: React.FC = () => {
                                         {...params}
                                         label="Сотрудники"
                                         disabled={!isEditing || isUsersLoading}
+                                        error={!!errors.employeeIds}
+                                        helperText={errors.employeeIds}
                                         sx={formTextFieldStyles}
                                     />
                                 )}

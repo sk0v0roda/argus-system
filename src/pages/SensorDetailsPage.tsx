@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import Layout from "src/components/Layout";
-import {CircularProgress, Paper, TextField, Button, Box, Autocomplete, Select, MenuItem, FormControl, InputLabel, SelectChangeEvent} from "@mui/material";
+import {CircularProgress, Paper, TextField, Button, Box, Autocomplete, Select, MenuItem, FormControl, InputLabel, SelectChangeEvent, FormHelperText} from "@mui/material";
 import {Sensor, getSensors, updateSensor, createSensor} from "src/services/sensorService";
 import {Process, getProcesses} from "src/services/processService";
 import {formTextFieldStyles, formPaperStyles, formButtonStyles} from "src/styles/formStyles";
@@ -15,6 +15,13 @@ const SensorDetailsPage = () => {
     const [processes, setProcesses] = useState<Process[]>([]);
     const [isProcessesLoading, setIsProcessesLoading] = useState(true);
     const isCreating = !id;
+    const [errors, setErrors] = useState<{
+        ticketTitle?: string;
+        ticketDescription?: string;
+        priority?: string;
+        resolveDaysCount?: string;
+        processId?: string;
+    }>({});
 
     const priorities = [
         { value: 0, label: 'Низкий' },
@@ -73,8 +80,35 @@ const SensorDetailsPage = () => {
         fetchProcesses();
     }, [id, navigate]);
 
+    const validateForm = (): boolean => {
+        const newErrors: typeof errors = {};
+
+        if (!sensorData?.ticketTitle?.trim()) {
+            newErrors.ticketTitle = 'Название обязательно';
+        }
+
+        if (!sensorData?.ticketDescription?.trim()) {
+            newErrors.ticketDescription = 'Описание обязательно';
+        }
+
+        if (sensorData?.priority === undefined || sensorData.priority < 0) {
+            newErrors.priority = 'Выберите приоритет';
+        }
+
+        if (!sensorData?.resolveDaysCount || sensorData.resolveDaysCount < 1) {
+            newErrors.resolveDaysCount = 'Срок решения должен быть больше 0';
+        }
+
+        if (!sensorData?.processId) {
+            newErrors.processId = 'Выберите бизнес-процесс';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSave = async () => {
-        if (sensorData) {
+        if (sensorData && validateForm()) {
             try {
                 let savedSensor;
                 if (isCreating) {
@@ -138,6 +172,8 @@ const SensorDetailsPage = () => {
                                 onChange={handleChange('ticketTitle')}
                                 disabled={!isEditing}
                                 fullWidth
+                                error={!!errors.ticketTitle}
+                                helperText={errors.ticketTitle}
                                 sx={formTextFieldStyles}
                             />
                             <TextField
@@ -148,9 +184,11 @@ const SensorDetailsPage = () => {
                                 fullWidth
                                 multiline
                                 rows={4}
+                                error={!!errors.ticketDescription}
+                                helperText={errors.ticketDescription}
                                 sx={formTextFieldStyles}
                             />
-                            <FormControl fullWidth disabled={!isEditing}>
+                            <FormControl fullWidth disabled={!isEditing} error={!!errors.priority}>
                                 <InputLabel>Приоритет</InputLabel>
                                 <Select
                                     value={sensorData.priority}
@@ -164,6 +202,7 @@ const SensorDetailsPage = () => {
                                         </MenuItem>
                                     ))}
                                 </Select>
+                                {errors.priority && <FormHelperText>{errors.priority}</FormHelperText>}
                             </FormControl>
                             <TextField
                                 label="Срок решения (дней)"
@@ -172,9 +211,12 @@ const SensorDetailsPage = () => {
                                 onChange={handleChange('resolveDaysCount')}
                                 disabled={!isEditing}
                                 fullWidth
+                                error={!!errors.resolveDaysCount}
+                                helperText={errors.resolveDaysCount}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
+                                inputProps={{ min: 1 }}
                                 sx={formTextFieldStyles}
                             />
                             <Autocomplete
@@ -187,6 +229,8 @@ const SensorDetailsPage = () => {
                                         {...params}
                                         label="Бизнес-процесс"
                                         disabled={!isEditing || isProcessesLoading}
+                                        error={!!errors.processId}
+                                        helperText={errors.processId}
                                         sx={formTextFieldStyles}
                                     />
                                 )}
