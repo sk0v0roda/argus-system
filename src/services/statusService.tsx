@@ -80,8 +80,15 @@ export interface StatusGraphResponse {
 
 export const getStatusGraphs = async (graphIds?: string[]): Promise<StatusGraph[]> => {
     try {
-        const params = graphIds ? { graphIds } : {};
-        const response = await api.get<{ graphs: StatusGraphResponse[] }>('/statuses/api/v1/graphs', { params });
+        let url = '/statuses/api/v1/graphs';
+        if (graphIds && graphIds.length > 0) {
+            url += `?graphIds=${graphIds[0]}`;
+        }
+        
+        console.log('Request URL:', url);
+        const response = await api.get<{ graphs: StatusGraphResponse[] }>(url);
+        
+        console.log('Response data:', response.data);
         if (!response.data.graphs || !Array.isArray(response.data.graphs)) {
             console.error('Ответ API не содержит массив графов:', response.data);
             return [];
@@ -95,11 +102,17 @@ export const getStatusGraphs = async (graphIds?: string[]): Promise<StatusGraph[
 
 export const getStatusGraphById = async (id: string): Promise<StatusGraph> => {
     try {
-        const graphs = await getStatusGraphs([id]);
-        if (graphs.length === 0) {
+        console.log('Getting graph by ID:', id);
+        const url = `/statuses/api/v1/graphs?graphIds=${id}`;
+        console.log('Request URL:', url);
+        
+        const response = await api.get<{ graphs: StatusGraphResponse[] }>(url);
+        console.log('Response data:', response.data);
+        
+        if (!response.data.graphs || response.data.graphs.length === 0) {
             throw new Error('Граф не найден');
         }
-        return graphs[0];
+        return convertToReactFlowFormat(response.data.graphs[0]);
     } catch (error) {
         console.error('Ошибка при получении графа:', error);
         throw error;
