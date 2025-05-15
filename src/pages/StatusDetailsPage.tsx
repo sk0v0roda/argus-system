@@ -349,7 +349,7 @@ const StatusDetailsPage: React.FC = () => {
                                 value={getSelectedDuty()}
                                 onChange={handleDutyChange}
                                 options={duties}
-                                getOptionLabel={(option) => `Дежурство #${option.id} (${new Date(option.start_time).toLocaleString()})`}
+                                getOptionLabel={(option) => `${option.name} (${new Date(option.start_time).toLocaleString()})`}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}

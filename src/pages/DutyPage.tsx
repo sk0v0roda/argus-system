@@ -28,7 +28,8 @@ const DutyPage: React.FC = () => {
     };
 
     const filteredDuties = duties.filter((duty) =>
-        formatDutyInfo(duty).toLowerCase().includes(searchQuery.toLowerCase())
+        (duty.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        formatDutyInfo(duty).toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
     return (
@@ -62,7 +63,7 @@ const DutyPage: React.FC = () => {
                                 sx={listItemStyles}
                             >
                                 <ListItemText
-                                    primary={`Дежурство #${duty.id}`}
+                                    primary={duty.name}
                                     secondary={formatDutyInfo(duty)}
                                 />
                             </ListItem>

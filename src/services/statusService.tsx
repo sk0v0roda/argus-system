@@ -267,19 +267,19 @@ export const convertToReactFlowFormat = (graph: StatusGraphResponse): StatusGrap
         const x = (indexInLevel - (totalInLevel - 1) / 2) * HORIZONTAL_SPACING;
         
         return {
-            id: status.id,
-            type: 'default',
+        id: status.id,
+        type: 'default',
             position: { 
                 x: x,
                 y: level * VERTICAL_SPACING
             },
-            data: { 
-                label: status.name,
-                description: status.description,
-                escalationSLA: status.escalationSLA,
-                notification: status.notification,
-                comment: status.comment,
-                dutyId: status.dutyId
+        data: { 
+            label: status.name,
+            description: status.description,
+            escalationSLA: status.escalationSLA,
+            notification: status.notification,
+            comment: status.comment,
+            dutyId: status.dutyId
             },
             style: {
                 width: 200,
@@ -287,7 +287,7 @@ export const convertToReactFlowFormat = (graph: StatusGraphResponse): StatusGrap
                 borderRadius: 8,
                 border: '1px solid #ccc',
                 backgroundColor: '#fff'
-            }
+        }
         };
     });
 
