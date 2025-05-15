@@ -78,17 +78,9 @@ export interface StatusGraphResponse {
     statuses: GraphStatus[];
 }
 
-export const getStatusGraphs = async (graphIds?: string[]): Promise<StatusGraph[]> => {
+export const getStatusGraphs = async (): Promise<StatusGraph[]> => {
     try {
-        let url = '/statuses/api/v1/graphs';
-        if (graphIds && graphIds.length > 0) {
-            url += `?graphIds=${graphIds[0]}`;
-        }
-        
-        console.log('Request URL:', url);
-        const response = await api.get<{ graphs: StatusGraphResponse[] }>(url);
-        
-        console.log('Response data:', response.data);
+        const response = await api.get<{ graphs: StatusGraphResponse[] }>('/statuses/api/v1/graphs');
         if (!response.data.graphs || !Array.isArray(response.data.graphs)) {
             console.error('Ответ API не содержит массив графов:', response.data);
             return [];
@@ -102,17 +94,14 @@ export const getStatusGraphs = async (graphIds?: string[]): Promise<StatusGraph[
 
 export const getStatusGraphById = async (id: string): Promise<StatusGraph> => {
     try {
-        console.log('Getting graph by ID:', id);
-        const url = `/statuses/api/v1/graphs?graphIds=${id}`;
-        console.log('Request URL:', url);
+        const graphs = await getStatusGraphs();
+        const graph = graphs.find(g => g.id === id);
         
-        const response = await api.get<{ graphs: StatusGraphResponse[] }>(url);
-        console.log('Response data:', response.data);
-        
-        if (!response.data.graphs || response.data.graphs.length === 0) {
+        if (!graph) {
             throw new Error('Граф не найден');
         }
-        return convertToReactFlowFormat(response.data.graphs[0]);
+        
+        return graph;
     } catch (error) {
         console.error('Ошибка при получении графа:', error);
         throw error;
@@ -222,26 +211,96 @@ export const createStatus = async (status: Omit<Status, 'id'>): Promise<Status> 
 };
 
 export const convertToReactFlowFormat = (graph: StatusGraphResponse): StatusGraph => {
-    const nodes: Node[] = graph.statuses.map(status => ({
-        id: status.id,
-        type: 'default',
-        position: { x: status.orderNum * 200, y: 0 }, // Пока просто располагаем по горизонтали
-        data: { 
-            label: status.name,
-            description: status.description,
-            escalationSLA: status.escalationSLA,
-            notification: status.notification,
-            comment: status.comment,
-            dutyId: status.dutyId
+    const VERTICAL_SPACING = 150; // Расстояние между уровнями
+    const HORIZONTAL_SPACING = 400; // Увеличили расстояние между узлами на одном уровне с 250 до 400
+    
+    // Находим корневые узлы (те, в которые нет входящих рёбер)
+    const incomingEdges = new Set(
+        graph.statuses.flatMap(status => 
+            status.transitions.map(t => t.statusId)
+        )
+    );
+    
+    const rootNodes = graph.statuses.filter(status => !incomingEdges.has(status.id));
+
+    // Строим карту переходов для быстрого доступа
+    const transitionsMap = new Map(
+        graph.statuses.map(status => [
+            status.id,
+            status.transitions.map(t => t.statusId)
+        ])
+    );
+
+    // Вычисляем уровень для каждого узла
+    const levels = new Map<string, number>();
+    const processLevel = (statusId: string, level: number) => {
+        if (levels.has(statusId)) {
+            return;
         }
-    }));
+        levels.set(statusId, level);
+        const transitions = transitionsMap.get(statusId) || [];
+        transitions.forEach(targetId => {
+            processLevel(targetId, level + 1);
+        });
+    };
+
+    // Начинаем с корневых узлов
+    rootNodes.forEach(node => processLevel(node.id, 0));
+
+    // Группируем узлы по уровням
+    const nodesAtLevel = new Map<number, string[]>();
+    levels.forEach((level, statusId) => {
+        if (!nodesAtLevel.has(level)) {
+            nodesAtLevel.set(level, []);
+        }
+        nodesAtLevel.get(level)?.push(statusId);
+    });
+
+    // Создаем узлы с вычисленными позициями
+    const nodes: Node[] = graph.statuses.map(status => {
+        const level = levels.get(status.id) || 0;
+        const nodesInLevel = nodesAtLevel.get(level) || [];
+        const indexInLevel = nodesInLevel.indexOf(status.id);
+        const totalInLevel = nodesInLevel.length;
+        
+        // Вычисляем x-координату, чтобы узлы на одном уровне были по центру
+        const x = (indexInLevel - (totalInLevel - 1) / 2) * HORIZONTAL_SPACING;
+        
+        return {
+            id: status.id,
+            type: 'default',
+            position: { 
+                x: x,
+                y: level * VERTICAL_SPACING
+            },
+            data: { 
+                label: status.name,
+                description: status.description,
+                escalationSLA: status.escalationSLA,
+                notification: status.notification,
+                comment: status.comment,
+                dutyId: status.dutyId
+            },
+            style: {
+                width: 200,
+                padding: 10,
+                borderRadius: 8,
+                border: '1px solid #ccc',
+                backgroundColor: '#fff'
+            }
+        };
+    });
 
     const edges: Edge[] = graph.statuses.flatMap(status => 
         status.transitions.map(transition => ({
             id: `e${status.id}-${transition.statusId}`,
             source: status.id,
             target: transition.statusId,
-            label: transition.name
+            label: transition.name,
+            type: 'smoothstep',
+            animated: true,
+            style: { stroke: '#666' },
+            labelStyle: { fill: '#666', fontSize: 12 }
         }))
     );
 

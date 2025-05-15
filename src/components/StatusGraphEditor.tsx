@@ -95,10 +95,14 @@ const StatusGraphEditor: React.FC<StatusGraphEditorProps> = ({ graph, onSave, is
                     }}
                     nodesDraggable={true}
                     nodesConnectable={isEditing}
-                    elementsSelectable={isEditing}
+                    elementsSelectable={true}
                     minZoom={0.1}
                     maxZoom={4}
-                    attributionPosition="bottom-right"
+                    fitViewOptions={{
+                        padding: 0.2,
+                        includeHiddenNodes: true
+                    }}
+                    defaultViewport={{ x: 0, y: 0, zoom: 1 }}
                 >
                     <Background />
                     <Controls />
